@@ -14,7 +14,7 @@ import MainNavigator from './MainNavigator';
 
 const Stack = createNativeStackNavigator();
 
-const RootNavigator = () => {
+const RootNavigator = ({ onLongPressHeader: _onLongPressHeader }) => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Main" component={MainNavigator} />

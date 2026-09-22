@@ -10,7 +10,7 @@
  */
 
 import { appendIncident, loadIncidents, updateIncident } from './storageService';
-import * as Crypto from 'expo-crypto';
+import { DefaultIdGenerator } from './idGenerator';
 
 /**
  * @typedef {Object} IncidentLocation
@@ -51,7 +51,7 @@ import * as Crypto from 'expo-crypto';
  * @returns {Promise<IncidentRecord>}
  */
 export async function logIncident({ patrolId, rangerId, parkId, type, description, location, photoUri = null }) {
-  const id = await Crypto.randomUUID();
+  const id = await DefaultIdGenerator.generate();
 
   /** @type {IncidentRecord} */
   const incident = {

@@ -1,10 +1,11 @@
 /**
  * Tests for storageService.js
- * Uses the official AsyncStorage Jest mock.
+ * Uses InMemoryKeyValueStore (no real storage).
  * Naming: <method>_<condition>_<expectedResult>
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { InMemoryKeyValueStore } from '../storage/InMemoryKeyValueStore';
+import { initStorageService } from '../storageService';
 import {
   loadIncidents,
   saveIncidents,
@@ -14,12 +15,11 @@ import {
   savePatrol,
 } from '../storageService';
 
-// AsyncStorage mock is auto-provided by jest-expo via
-// @react-native-async-storage/async-storage/jest/async-storage-mock
-
 describe('storageService', () => {
-  beforeEach(async () => {
-    await AsyncStorage.clear();
+  beforeEach(() => {
+    // Initialize with fresh in-memory store for each test
+    const store = InMemoryKeyValueStore();
+    initStorageService(store);
   });
 
   // ── loadIncidents ─────────────────────────────────────────────────────────
@@ -35,7 +35,7 @@ describe('storageService', () => {
     test('loadIncidents_withStoredData_returnsArray', async () => {
       // Arrange
       const incidents = [{ id: 'INC-1', type: 'SNARE' }];
-      await AsyncStorage.setItem('@ranger/incidents', JSON.stringify(incidents));
+      await saveIncidents(incidents);
 
       // Act
       const result = await loadIncidents();
@@ -54,11 +54,11 @@ describe('storageService', () => {
 
       // Act
       const ok = await saveIncidents(incidents);
+      const result = await loadIncidents();
 
       // Assert
       expect(ok).toBe(true);
-      const stored = JSON.parse(await AsyncStorage.getItem('@ranger/incidents'));
-      expect(stored).toEqual(incidents);
+      expect(result).toEqual(incidents);
     });
 
     test('saveIncidents_emptyArray_replacesWithEmpty', async () => {

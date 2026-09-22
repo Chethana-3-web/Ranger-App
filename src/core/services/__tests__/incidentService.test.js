@@ -1,10 +1,11 @@
 /**
  * Tests for incidentService.js
  * Naming: <method>_<condition>_<expectedResult>
- * expo-crypto is mocked so tests never touch a real device.
+ * Uses InMemoryKeyValueStore to avoid touching real storage.
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { InMemoryKeyValueStore } from '../storage/InMemoryKeyValueStore';
+import { initStorageService } from '../storageService';
 import {
   logIncident,
   getAllIncidents,
@@ -45,7 +46,9 @@ const SAMPLE_PARAMS = {
 
 describe('incidentService', () => {
   beforeEach(async () => {
-    await AsyncStorage.clear();
+    // Initialize with a fresh in-memory store for each test
+    const store = InMemoryKeyValueStore();
+    initStorageService(store);
     jest.clearAllMocks();
   });
 
