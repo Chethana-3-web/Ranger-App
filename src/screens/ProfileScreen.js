@@ -1,8 +1,7 @@
 /**
  * Ranger App – Profile Screen
  *
- * Displays the seeded ranger's profile and current patrol info.
- * No edits in this prototype – rangers are provisioned by the park manager.
+ * Displays the seeded ranger's profile and active patrol info.
  */
 
 import React from 'react';
@@ -10,10 +9,11 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import { useSession } from '../context/SessionContext';
-import { getParkById } from '../config/parks';
-import AppHeader from '../components/AppHeader';
-import COLORS from '../constants/colors';
+import { useSession } from '../core/session/SessionContext';
+import { getParkById } from '../core/config/parks';
+import AppHeader from '../core/ui/AppHeader';
+import COLORS from '../core/constants/colors';
+import theme from '../core/ui/theme';
 
 const ProfileScreen = () => {
   const { ranger, patrol } = useSession();
@@ -23,7 +23,6 @@ const ProfileScreen = () => {
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <AppHeader title="Profile" />
       <ScrollView contentContainerStyle={styles.scroll}>
-        {/* Avatar */}
         <View style={styles.avatarSection}>
           <View style={styles.avatar}>
             <Ionicons name="person" size={48} color={COLORS.PRIMARY} />
@@ -32,13 +31,11 @@ const ProfileScreen = () => {
           <Text style={styles.rangerRole}>{ranger.role}</Text>
         </View>
 
-        {/* Info cards */}
-        <InfoRow icon="id-card-outline"  label="Ranger ID"  value={ranger.id} />
-        <InfoRow icon="map-outline"       label="Park"       value={park?.name ?? ranger.parkId} />
-        <InfoRow icon="shield-outline"    label="Patrol ID"  value={patrol.id} />
-        <InfoRow icon="time-outline"      label="Patrol Started"
-          value={new Date(patrol.startedAt).toLocaleString()} />
-        <InfoRow icon="checkmark-circle-outline" label="Status" value={patrol.status} />
+        <InfoRow icon="id-card-outline"          label="Ranger ID"       value={ranger.id} />
+        <InfoRow icon="map-outline"              label="Park"            value={park?.name ?? ranger.parkId} />
+        <InfoRow icon="shield-outline"           label="Patrol ID"       value={patrol.id} />
+        <InfoRow icon="time-outline"             label="Patrol Started"  value={new Date(patrol.startedAt).toLocaleString()} />
+        <InfoRow icon="checkmark-circle-outline" label="Status"          value={patrol.status} />
 
         <Text style={styles.note}>
           Ranger accounts are managed by the park operations dashboard.
@@ -62,57 +59,30 @@ const InfoRow = ({ icon, label, value }) => (
 );
 
 const styles = StyleSheet.create({
-  safe:    { flex: 1, backgroundColor: COLORS.BACKGROUND },
-  scroll:  { padding: 20 },
-  avatarSection: {
-    alignItems: 'center',
-    marginBottom: 28,
-    paddingTop: 12,
-  },
+  safe:   { flex: 1, backgroundColor: COLORS.BACKGROUND },
+  scroll: { padding: 20 },
+  avatarSection: { alignItems: 'center', marginBottom: 28, paddingTop: 12 },
   avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: COLORS.PRIMARY_TINT,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
+    width: 96, height: 96, borderRadius: 48,
+    backgroundColor: COLORS.PRIMARY + '1A',
+    justifyContent: 'center', alignItems: 'center', marginBottom: 12,
   },
   rangerName: { fontSize: 22, fontWeight: '800', color: COLORS.TEXT_PRIMARY },
   rangerRole: { fontSize: 14, color: COLORS.TEXT_SECONDARY, marginTop: 4, textTransform: 'capitalize' },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    backgroundColor: COLORS.SURFACE,
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: COLORS.SURFACE, borderRadius: 10, padding: 14, marginBottom: 10,
+    ...theme.shadow.sm,
   },
   infoIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.PRIMARY_TINT,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: COLORS.PRIMARY + '1A',
+    justifyContent: 'center', alignItems: 'center',
   },
   infoContent: { flex: 1 },
-  infoLabel: { fontSize: 11, color: COLORS.TEXT_SECONDARY, textTransform: 'uppercase', letterSpacing: 0.5 },
-  infoValue: { fontSize: 15, fontWeight: '600', color: COLORS.TEXT_PRIMARY, marginTop: 2 },
-  note: {
-    fontSize: 12,
-    color: COLORS.TEXT_DISABLED,
-    textAlign: 'center',
-    marginTop: 20,
-    lineHeight: 18,
-    paddingHorizontal: 16,
-  },
+  infoLabel:  { fontSize: 11, color: COLORS.TEXT_SECONDARY, textTransform: 'uppercase', letterSpacing: 0.5 },
+  infoValue:  { fontSize: 15, fontWeight: '600', color: COLORS.TEXT_PRIMARY, marginTop: 2 },
+  note: { fontSize: 12, color: COLORS.TEXT_SECONDARY, textAlign: 'center', marginTop: 20, lineHeight: 18, paddingHorizontal: 16 },
 });
 
 export default ProfileScreen;

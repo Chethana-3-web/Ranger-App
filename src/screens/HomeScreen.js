@@ -1,10 +1,9 @@
 /**
  * Ranger App – Home Screen (Patrol Dashboard)
  *
- * Shows the seeded ranger's active patrol info, a quick-action tile to log
- * an incident, and a summary count of today's logged incidents.
- *
- * Mirrors the BinGo HomeScreen tile / quick-actions pattern.
+ * Shows the seeded ranger's active patrol info and quick-action tiles.
+ * Tiles are driven by the feature registry + the pending-incident count
+ * sourced from the Log Incident feature's repository.
  */
 
 import React, { useState, useCallback } from 'react';
@@ -20,79 +19,67 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
-import { useSession } from '../context/SessionContext';
-import { getIncidentsByPatrol } from '../services/incidentService';
-import { syncPendingIncidents } from '../services/syncService';
-import { getParkById } from '../config/parks';
-import OfflineBanner from '../components/OfflineBanner';
-import COLORS from '../constants/colors';
-
-// ── Quick action tiles ────────────────────────────────────────────────────────
-const QUICK_ACTIONS = [
-  {
-    id:          'log',
-    label:       'Log Incident',
-    icon:        'add-circle',
-    description: 'Record a snare, carcass, or illegal camp',
-    color:       COLORS.ERROR,
-    tab:         'Incidents',
-    screen:      'LogIncident',
-  },
-  {
-    id:          'list',
-    label:       'View Incidents',
-    icon:        'list',
-    description: 'Browse today\'s logged incidents',
-    color:       COLORS.PRIMARY,
-    tab:         'Incidents',
-    screen:      'IncidentList',
-  },
-  {
-    id:          'alerts',
-    label:       'Collar Alerts',
-    icon:        'notifications',
-    description: 'Animal collar & camera trap alerts',
-    color:       COLORS.ACCENT,
-    tab:         'Alerts',
-    screen:      null,
-  },
-];
+import { useSession } from '../core/session/SessionContext';
+import { getParkById } from '../core/config/parks';
+import OfflineBanner from '../core/ui/OfflineBanner';
+import COLORS from '../core/constants/colors';
+import { useIncidentServices } from '../features/log-incident/ui/hooks/useIncidentServices';
+import { SyncStatus } from '../features/log-incident/domain/syncStatus';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { ranger, patrol } = useSession();
   const park = getParkById(ranger.parkId);
+  const services = useIncidentServices();
 
-  const [incidentCount, setIncidentCount]   = useState(0);
-  const [pendingCount, setPendingCount]     = useState(0);
-  const [refreshing, setRefreshing]         = useState(false);
+  const [incidentCount, setIncidentCount] = useState(0);
+  const [pendingCount, setPendingCount]   = useState(0);
+  const [refreshing, setRefreshing]       = useState(false);
 
   const loadCounts = useCallback(async () => {
-    const incidents = await getIncidentsByPatrol(patrol.id);
-    setIncidentCount(incidents.length);
-    setPendingCount(incidents.filter((i) => i.syncStatus === 'PENDING').length);
-  }, [patrol.id]);
+    try {
+      const all     = await services.incidentRepo.findAll();
+      const pending = all.filter((i) => i.status === SyncStatus.PENDING_SYNC);
+      setIncidentCount(all.length);
+      setPendingCount(pending.length);
+    } catch { /* repo not ready yet — ignore */ }
+  }, [services.incidentRepo]);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadCounts();
-    }, [loadCounts])
-  );
+  useFocusEffect(useCallback(() => { loadCounts(); }, [loadCounts]));
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await syncPendingIncidents();
     await loadCounts();
     setRefreshing(false);
   }, [loadCounts]);
 
-  const handleTile = (action) => {
-    if (action.screen) {
-      navigation.navigate(action.tab, { screen: action.screen });
-    } else {
-      navigation.navigate(action.tab);
-    }
-  };
+  // Quick action tiles — only for features implemented in this project
+  const QUICK_ACTIONS = [
+    {
+      id:          'log',
+      label:       'Log Incident',
+      icon:        'add-circle',
+      description: 'Record a snare, carcass, or illegal camp',
+      color:       COLORS.ERROR,
+      onPress:     () => navigation.navigate('Incidents', { screen: 'LogIncidentFlow' }),
+    },
+    {
+      id:          'list',
+      label:       'View Incidents',
+      icon:        'list',
+      description: `${incidentCount} total · ${pendingCount} pending`,
+      color:       COLORS.PRIMARY,
+      onPress:     () => navigation.navigate('Incidents', { screen: 'IncidentList' }),
+    },
+    {
+      id:          'sync',
+      label:       'Sync Status',
+      icon:        'cloud-upload-outline',
+      description: pendingCount > 0 ? `${pendingCount} pending upload` : 'All synced',
+      color:       pendingCount > 0 ? COLORS.ACCENT : COLORS.SUCCESS,
+      onPress:     () => navigation.navigate('Incidents', { screen: 'SyncStatus' }),
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
@@ -128,7 +115,7 @@ const HomeScreen = () => {
           <Text style={styles.patrolId}>ID: {patrol.id}</Text>
           <View style={styles.statsRow}>
             <StatBox label="Incidents" value={incidentCount} icon="clipboard" />
-            <StatBox label="Pending Sync" value={pendingCount} icon="cloud-upload-outline" accent />
+            <StatBox label="Pending Sync" value={pendingCount} icon="cloud-upload-outline" accent={pendingCount > 0} />
           </View>
         </View>
 
@@ -139,7 +126,7 @@ const HomeScreen = () => {
             <TouchableOpacity
               key={action.id}
               style={styles.tile}
-              onPress={() => handleTile(action)}
+              onPress={action.onPress}
               activeOpacity={0.8}
               accessibilityRole="button"
               accessibilityLabel={action.label}
@@ -183,63 +170,38 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontWeight: '800', color: '#fff' },
   headerSub:   { fontSize: 13, color: 'rgba(255,255,255,0.78)', marginTop: 2 },
   headerBadge: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 48, height: 48, borderRadius: 24,
     backgroundColor: 'rgba(255,255,255,0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center', alignItems: 'center',
   },
   scroll: { padding: 16 },
   patrolCard: {
-    backgroundColor: COLORS.SURFACE,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: COLORS.SURFACE, borderRadius: 14, padding: 16, marginBottom: 20,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
   },
   patrolTitle: { fontSize: 16, fontWeight: '700', color: COLORS.TEXT_PRIMARY, marginBottom: 4 },
   patrolId:    { fontSize: 12, color: COLORS.TEXT_SECONDARY, marginBottom: 14 },
   statsRow:    { flexDirection: 'row', gap: 12 },
   statBox: {
-    flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
-    borderRadius: 10,
-    padding: 12,
-    alignItems: 'center',
-    gap: 4,
+    flex: 1, backgroundColor: COLORS.BACKGROUND, borderRadius: 10,
+    padding: 12, alignItems: 'center', gap: 4,
   },
-  statValue: { fontSize: 22, fontWeight: '800', color: COLORS.TEXT_PRIMARY },
-  statLabel: { fontSize: 11, color: COLORS.TEXT_SECONDARY, textAlign: 'center' },
+  statValue:    { fontSize: 22, fontWeight: '800', color: COLORS.TEXT_PRIMARY },
+  statLabel:    { fontSize: 11, color: COLORS.TEXT_SECONDARY, textAlign: 'center' },
   sectionLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: 12,
-    marginLeft: 4,
+    fontSize: 14, fontWeight: '700', color: COLORS.TEXT_PRIMARY,
+    marginBottom: 12, marginLeft: 4,
   },
   tilesGrid: { gap: 12 },
   tile: {
-    backgroundColor: COLORS.SURFACE,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    backgroundColor: COLORS.SURFACE, borderRadius: 12, padding: 16,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
   },
   tileIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
+    width: 52, height: 52, borderRadius: 26,
+    justifyContent: 'center', alignItems: 'center', marginBottom: 10,
   },
   tileLabel: { fontSize: 16, fontWeight: '700', color: COLORS.TEXT_PRIMARY, marginBottom: 4 },
   tileDesc:  { fontSize: 13, color: COLORS.TEXT_SECONDARY },

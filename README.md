@@ -80,12 +80,50 @@ See `.kiro/steering/structure.md` for the full annotated layout.
 
 - **No login flow** – a seeded session (`Ranger Perera / PARK-YALA / PTL-001`) is
   injected via `SessionContext`. Real auth will be added in a later sprint.
-- **Offline-first** – all writes go to AsyncStorage first; `syncService` uploads
-  them when NetInfo reports connectivity.
-- **Mocked server** – `syncService.uploadToServer()` simulates an API call.
-  Replace with a real `axios` call once the backend is ready.
+- **Offline-first** – all writes go to AsyncStorage first; SyncManager uploads
+  them when NetInfo reports connectivity is restored.
+- **Mocked server** – `MockRemoteGateway` simulates the API. Replace `upload()`
+  with a real `fetch`/`axios` call once the backend is ready.
 - **Park-configurable incident types** – each park in `parks.js` declares its own
-  `enabledIncidentTypes` array, so `LogIncidentScreen` shows only relevant types.
+  `enabledIncidentTypes` array; only those types are shown to the ranger.
+
+---
+
+## Feature: Log Patrol Incident (UC-04)
+
+Rangers record wildlife incidents (snares, carcasses, illegal camps, tracks)
+with photo evidence, GPS location, and description. Works fully offline.
+
+### Flow
+```
+Home → Select Type → Add Photo → GPS Capture → Details → Save → Saved
+```
+
+### Alternate Flows
+- **A1 GPS unavailable** – manual coordinate entry at park centre
+- **A2 Camera unavailable** – skip photo, continue with `photoUri = null`
+- **A3 Cancel** – keep draft or discard
+
+### Error Flows
+- **E1 Crash recovery** – draft autosaved; restore prompt on next launch
+- **E2 Sync failure** – exponential backoff, per-item Retry, Sync All screen
+- **E3 Validation** – inline field errors, Save stays disabled
+- **E4 Storage failure** – error dialog, draft retained
+
+### Feature Structure
+```
+src/features/log-incident/
+├── domain/          Incident, Draft, IncidentType, SyncStatus (pure)
+├── ports/           Abstract contracts for all I/O
+├── application/     incidentService, syncManager, validator, retryPolicy
+├── infrastructure/  Expo/AsyncStorage implementations + test doubles
+└── ui/              Screens, hooks
+```
+
+### Docs
+- `docs/architecture.md` – layers, patterns, DI wiring
+- `docs/traceability.md` – flow → screen → method → test
+- `docs/demo-script.md` – how to trigger every flow via the Simulator Panel
 
 ---
 

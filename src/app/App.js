@@ -4,15 +4,9 @@
  * Smart Wildlife Conservation and Anti-Poaching Monitoring System
  * Sri Lanka Department of Wildlife Conservation
  * SE3070 – Case Studies in Software Engineering 2026 Semester 2
- *
- * Sets up:
- * - Global providers (GestureHandler, SafeArea, Navigation)
- * - SessionProvider for seeded ranger/patrol
- * - DI Container with all services
- * - SimulatorPanel (dev-only)
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -27,41 +21,42 @@ import { initStorageService } from '../core/services/storageService';
 import { NetInfoConnectivityMonitor } from '../core/services/connectivity/NetInfoConnectivityMonitor';
 import { DefaultClock } from '../core/services/clock';
 import { DefaultIdGenerator } from '../core/services/idGenerator';
+import { registerLogIncidentFeature } from '../features/log-incident/index';
+import { setDIContainer } from '../features/log-incident/ui/hooks/useDraftRepo';
+import { setServicesContainer } from '../features/log-incident/ui/hooks/useIncidentServices';
 
 /**
- * Initialize the DI container with all services.
+ * Build and populate the DI container once at startup.
  *
  * @returns {import('../core/di/container').DIContainer}
  */
-function initDIContainer() {
+function buildContainer() {
   const container = createContainer();
 
-  // Singletons
   const kv = AsyncStorageKeyValueStore();
   initStorageService(kv);
 
-  container.singleton('keyValueStore', kv);
-  container.singleton('clock', DefaultClock);
-  container.singleton('idGenerator', DefaultIdGenerator);
-  container.singleton('connectivityMonitor', NetInfoConnectivityMonitor());
+  const connectivityMonitor = NetInfoConnectivityMonitor();
+
+  container.singleton('keyValueStore',        kv);
+  container.singleton('clock',                DefaultClock);
+  container.singleton('idGenerator',          DefaultIdGenerator);
+  container.singleton('connectivityMonitor',  connectivityMonitor);
+
+  // Register Log Incident feature and start its SyncManager
+  registerLogIncidentFeature(container, kv, connectivityMonitor);
 
   return container;
 }
 
-// Global DI container (attached to global for easy access in dev)
-const diContainer = initDIContainer();
-if (typeof global !== 'undefined') {
-  global.__diContainer = diContainer;
-}
+const diContainer = buildContainer();
+
+// Make the container accessible to UI hooks
+setDIContainer(diContainer);
+setServicesContainer(diContainer);
 
 const App = () => {
   const [simulatorPanelVisible, setSimulatorPanelVisible] = useState(false);
-
-  // Setup connectivity sync on mount
-  useEffect(() => {
-    // Placeholder: connect to connectivity monitor and sync on online
-    // This will be wired up when syncService is integrated
-  }, []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -73,7 +68,6 @@ const App = () => {
           </NavigationContainer>
         </SessionProvider>
 
-        {/* Dev-only simulator panel */}
         {__DEV__ && (
           <SimulatorPanel
             visible={simulatorPanelVisible}
