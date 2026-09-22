@@ -20,14 +20,22 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import COLORS from '../constants/colors';
+import COLORS from '../core/constants/colors';
 
-// Screens
+// Core screens
 import HomeScreen            from '../screens/HomeScreen';
-import LogIncidentScreen     from '../screens/LogIncidentScreen';
 import IncidentListScreen    from '../screens/IncidentListScreen';
 import AlertsScreen          from '../screens/AlertsScreen';
 import ProfileScreen         from '../screens/ProfileScreen';
+
+// Log Incident feature screens
+import IncidentTypeScreen    from '../features/log-incident/ui/screens/IncidentTypeScreen';
+import AddPhotoScreen        from '../features/log-incident/ui/screens/AddPhotoScreen';
+import LocationCaptureScreen from '../features/log-incident/ui/screens/LocationCaptureScreen';
+import ManualLocationScreen  from '../features/log-incident/ui/screens/ManualLocationScreen';
+import DetailsScreen         from '../features/log-incident/ui/screens/DetailsScreen';
+import SavedScreen           from '../features/log-incident/ui/screens/SavedScreen';
+import SyncStatusScreen      from '../features/log-incident/ui/screens/SyncStatusScreen';
 
 const Tab   = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -40,12 +48,26 @@ const TAB_ICONS = {
   Profile:   { active: 'person',        inactive: 'person-outline' },
 };
 
-// ── Stacks ────────────────────────────────────────────────────────────────────
+// ── Log Incident sub-stack ────────────────────────────────────────────────────
+
+const LogIncidentFlow = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="IncidentType"    component={IncidentTypeScreen} />
+    <Stack.Screen name="AddPhoto"        component={AddPhotoScreen} />
+    <Stack.Screen name="LocationCapture" component={LocationCaptureScreen} />
+    <Stack.Screen name="ManualLocation"  component={ManualLocationScreen} />
+    <Stack.Screen name="Details"         component={DetailsScreen} />
+    <Stack.Screen name="Saved"           component={SavedScreen} />
+  </Stack.Navigator>
+);
+
+// ── Incidents tab stack ───────────────────────────────────────────────────────
 
 const IncidentStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="IncidentList" component={IncidentListScreen} />
-    <Stack.Screen name="LogIncident"  component={LogIncidentScreen} />
+    <Stack.Screen name="IncidentList"    component={IncidentListScreen} />
+    <Stack.Screen name="LogIncidentFlow" component={LogIncidentFlow} />
+    <Stack.Screen name="SyncStatus"      component={SyncStatusScreen} />
   </Stack.Navigator>
 );
 

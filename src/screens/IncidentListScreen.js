@@ -1,9 +1,9 @@
 /**
  * Ranger App – Incident List Screen
  *
- * Displays all incidents logged during the current patrol.
- * Pull-to-refresh triggers a sync attempt.
- * FAB navigates to LogIncidentScreen.
+ * Displays all incidents logged via the Log Incident feature.
+ * Pull-to-refresh reloads from the feature's repository.
+ * FAB navigates to the LogIncidentFlow.
  */
 
 import React, { useState, useCallback } from 'react';
@@ -14,59 +14,60 @@ import {
   StyleSheet,
   TouchableOpacity,
   RefreshControl,
-  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
-import { useSession } from '../context/SessionContext';
-import { getIncidentsByPatrol } from '../services/incidentService';
-import { syncPendingIncidents } from '../services/syncService';
-import IncidentCard from '../components/IncidentCard';
-import OfflineBanner from '../components/OfflineBanner';
-import AppHeader from '../components/AppHeader';
-import COLORS from '../constants/colors';
+import { useSession } from '../core/session/SessionContext';
+import AppHeader from '../core/ui/AppHeader';
+import OfflineBanner from '../core/ui/OfflineBanner';
+import { SyncStatus, SYNC_STATUS_LABELS } from '../features/log-incident/domain/syncStatus';
+import { useIncidentServices } from '../features/log-incident/ui/hooks/useIncidentServices';
+import COLORS from '../core/constants/colors';
+import theme from '../core/ui/theme';
+
+const STATUS_COLORS = {
+  [SyncStatus.PENDING_SYNC]: COLORS.STATUS_PENDING,
+  [SyncStatus.SYNCED]:       COLORS.STATUS_SYNCED,
+  [SyncStatus.FAILED]:       COLORS.STATUS_FAILED,
+};
 
 const IncidentListScreen = () => {
-  const navigation     = useNavigation();
-  const { patrol }     = useSession();
-  const [incidents, setIncidents] = useState([]);
-  const [loading, setLoading]     = useState(false);
+  const navigation  = useNavigation();
+  const { patrol }  = useSession();
+  const services    = useIncidentServices();
+
+  const [incidents, setIncidents]   = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadData = useCallback(async () => {
-    setLoading(true);
-    const data = await getIncidentsByPatrol(patrol.id);
-    // Most recent first
-    setIncidents([...data].reverse());
-    setLoading(false);
-  }, [patrol.id]);
+    try {
+      const all = await services.incidentRepo.findAll();
+      setIncidents([...all].sort(
+        (a, b) => new Date(b.recordedAt) - new Date(a.recordedAt),
+      ));
+    } catch { /* repo not initialised yet */ }
+  }, [services.incidentRepo]);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadData();
-    }, [loadData])
-  );
+  useFocusEffect(useCallback(() => { loadData(); }, [loadData]));
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await syncPendingIncidents();
     await loadData();
     setRefreshing(false);
   }, [loadData]);
 
   const renderItem = ({ item }) => (
-    <IncidentCard incident={item} />
-  );
-
-  const renderEmpty = () => (
-    <View style={styles.emptyState}>
-      <Ionicons name="clipboard-outline" size={56} color={COLORS.BORDER} />
-      <Text style={styles.emptyTitle}>No incidents yet</Text>
-      <Text style={styles.emptyDesc}>
-        Tap the + button below to log your first incident on this patrol.
-      </Text>
+    <View style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.cardType}>{item.type}</Text>
+        <View style={[styles.chip, { backgroundColor: STATUS_COLORS[item.status] ?? COLORS.STATUS_PENDING }]}>
+          <Text style={styles.chipText}>{SYNC_STATUS_LABELS[item.status] ?? item.status}</Text>
+        </View>
+      </View>
+      <Text style={styles.cardDesc} numberOfLines={2}>{item.description}</Text>
+      <Text style={styles.cardMeta}>{new Date(item.recordedAt).toLocaleString()}</Text>
     </View>
   );
 
@@ -75,30 +76,26 @@ const IncidentListScreen = () => {
       <AppHeader title="Patrol Incidents" subtitle={`Patrol ${patrol.id}`} />
       <OfflineBanner />
 
-      {loading && incidents.length === 0 ? (
-        <ActivityIndicator style={styles.loader} color={COLORS.PRIMARY} />
-      ) : (
-        <FlatList
-          data={incidents}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          ListEmptyComponent={renderEmpty}
-          contentContainerStyle={styles.list}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[COLORS.PRIMARY]}
-              tintColor={COLORS.PRIMARY}
-            />
-          }
-        />
-      )}
+      <FlatList
+        data={incidents}
+        keyExtractor={(i) => i.id}
+        renderItem={renderItem}
+        contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.PRIMARY]} />
+        }
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Ionicons name="clipboard-outline" size={56} color={COLORS.BORDER} />
+            <Text style={styles.emptyTitle}>No incidents yet</Text>
+            <Text style={styles.emptyDesc}>Tap + to log your first incident.</Text>
+          </View>
+        }
+      />
 
-      {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => navigation.navigate('LogIncident')}
+        onPress={() => navigation.navigate('LogIncidentFlow')}
         accessibilityRole="button"
         accessibilityLabel="Log new incident"
       >
@@ -109,43 +106,28 @@ const IncidentListScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  safe:   { flex: 1, backgroundColor: COLORS.BACKGROUND },
-  list:   { padding: 16, paddingBottom: 80 },
-  loader: { flex: 1, marginTop: 60 },
-  emptyState: {
-    flex: 1,
-    alignItems: 'center',
-    paddingTop: 80,
-    paddingHorizontal: 40,
-    gap: 12,
+  safe:  { flex: 1, backgroundColor: COLORS.BACKGROUND },
+  list:  { padding: 16, paddingBottom: 100 },
+  card: {
+    backgroundColor: COLORS.SURFACE, borderRadius: 12, padding: 14,
+    marginBottom: 10, ...theme.shadow.sm,
   },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.TEXT_SECONDARY,
-    textAlign: 'center',
-  },
-  emptyDesc: {
-    fontSize: 14,
-    color: COLORS.TEXT_DISABLED,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  cardType:   { fontSize: 15, fontWeight: '700', color: COLORS.TEXT_PRIMARY },
+  chip: { borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
+  chipText: { fontSize: 11, fontWeight: '700', color: '#fff' },
+  cardDesc: { fontSize: 13, color: COLORS.TEXT_SECONDARY, marginBottom: 4 },
+  cardMeta: { fontSize: 11, color: COLORS.TEXT_SECONDARY },
+  empty: { alignItems: 'center', paddingTop: 80, gap: 12 },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: COLORS.TEXT_SECONDARY },
+  emptyDesc:  { fontSize: 14, color: COLORS.TEXT_SECONDARY, textAlign: 'center' },
   fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    position: 'absolute', bottom: 24, right: 24,
+    width: 56, height: 56, borderRadius: 28,
     backgroundColor: COLORS.PRIMARY,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 6,
-    elevation: 8,
+    justifyContent: 'center', alignItems: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2, shadowRadius: 6, elevation: 8,
   },
 });
 
