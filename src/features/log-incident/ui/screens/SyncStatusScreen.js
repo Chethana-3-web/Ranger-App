@@ -33,10 +33,10 @@ const SyncStatusScreen = () => {
   const services = useIncidentServices();
   const [incidents, setIncidents] = useState([]);
   const [syncing, setSyncing] = useState(false);
+  const [syncFailedBanner, setSyncFailedBanner] = useState(false);
 
   const loadIncidents = useCallback(async () => {
     const all = await services.incidentRepo.findAll();
-    // Sort: FAILED first, then PENDING, then SYNCED; within group by recordedAt desc
     const order = { [SyncStatus.FAILED]: 0, [SyncStatus.PENDING_SYNC]: 1, [SyncStatus.SYNCED]: 2 };
     const sorted = [...all].sort((a, b) => {
       const statusDiff = (order[a.status] ?? 1) - (order[b.status] ?? 1);
@@ -44,6 +44,11 @@ const SyncStatusScreen = () => {
       return new Date(b.recordedAt) - new Date(a.recordedAt);
     });
     setIncidents(sorted);
+    // Show E2 banner if any incident failed or is still pending after attempts
+    const hasSyncIssue = sorted.some(
+      (i) => i.status === SyncStatus.FAILED || (i.status === SyncStatus.PENDING_SYNC && i.syncAttempts > 0),
+    );
+    setSyncFailedBanner(hasSyncIssue);
   }, [services.incidentRepo]);
 
   useFocusEffect(useCallback(() => { loadIncidents(); }, [loadIncidents]));
@@ -117,6 +122,13 @@ const SyncStatusScreen = () => {
       <AppHeader title="Sync Status" subtitle={`${incidents.length} incident${incidents.length !== 1 ? 's' : ''}`} />
       <OfflineBanner />
 
+      {syncFailedBanner && (
+        <View style={styles.syncFailBanner}>
+          <Ionicons name="warning-outline" size={16} color="#fff" />
+          <Text style={styles.syncFailText}>Sync failed. Will retry automatically.</Text>
+        </View>
+      )}
+
       <FlatList
         data={incidents}
         keyExtractor={(i) => i.id}
@@ -186,6 +198,15 @@ const styles = StyleSheet.create({
   syncingText:{ color: theme.colors.textSecondary, fontSize: 14 },
   empty: { alignItems: 'center', gap: 16, paddingTop: 80 },
   emptyText: { color: theme.colors.textSecondary, fontSize: 15 },
+  syncFailBanner: {
+    backgroundColor: theme.colors.error,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  syncFailText: { color: '#fff', fontSize: 12, fontWeight: '600', flex: 1 },
 });
 
 export default SyncStatusScreen;
