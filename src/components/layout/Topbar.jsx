@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import SyncStatusChip from '../monitoring/SyncStatusChip.jsx';
-import { SYNC_STATUS } from '../../data/mockData.js';
+import { useSyncStatus } from '../../context/SyncContext.jsx';
 
 const TITLES = {
   '/dashboard':  'Dashboard Overview',
@@ -14,14 +14,19 @@ const TITLES = {
   '/reports':    'Reports',
 };
 
+/**
+ * Topbar – reads live sync status from SyncContext (updated by Monitoring page).
+ * Member 1: add user avatar / notification bell in topbar-right.
+ */
 export default function Topbar() {
-  const { pathname } = useLocation();
+  const { pathname }    = useLocation();
+  const { syncStatus }  = useSyncStatus();
+
   return (
     <header className="topbar">
       <span className="topbar-title">{TITLES[pathname] ?? 'Dashboard'}</span>
       <div className="topbar-right">
-        <SyncStatusChip status={SYNC_STATUS} />
-        {/* Member 1: add user avatar / notification bell here */}
+        <SyncStatusChip status={syncStatus} />
       </div>
     </header>
   );
