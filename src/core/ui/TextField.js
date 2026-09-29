@@ -1,26 +1,8 @@
-/**
- * Ranger App – TextField
- *
- * Text input with error text and character counter.
- */
-
 import React, { useState } from 'react';
-import { View, TextInput, Text } from 'react-native';
+import { View, TextInput, Text, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import theme from './theme';
 
-/**
- * @param {{
- *   label?: string,
- *   placeholder?: string,
- *   value: string,
- *   onChangeText: (text: string) => void,
- *   error?: string,
- *   maxLength?: number,
- *   multiline?: boolean,
- *   editable?: boolean,
- * }} props
- * @returns {React.ReactNode}
- */
 export function TextField({
   label,
   placeholder,
@@ -30,8 +12,11 @@ export function TextField({
   maxLength,
   multiline = false,
   editable = true,
+  isPassword = false,
+  ...rest
 }) {
   const [focused, setFocused] = useState(false);
+  const [isSecure, setIsSecure] = useState(isPassword);
 
   return (
     <View>
@@ -48,26 +33,48 @@ export function TextField({
         </Text>
       )}
 
-      <TextInput
-        style={{
+      <View style={{
+          flexDirection: 'row',
+          alignItems: 'center',
           borderWidth: 1,
           borderColor: error ? theme.colors.error : focused ? theme.colors.primary : theme.colors.border,
           borderRadius: theme.borderRadius.md,
-          padding: theme.spacing.md,
-          fontSize: 16,
-          color: theme.colors.text,
-          minHeight: multiline ? 100 : 40,
-        }}
-        placeholder={placeholder}
-        placeholderTextColor={theme.colors.textSecondary}
-        value={value}
-        onChangeText={onChangeText}
-        maxLength={maxLength}
-        multiline={multiline}
-        editable={editable}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-      />
+          backgroundColor: theme.colors.surface,
+      }}>
+        <TextInput
+          style={{
+            flex: 1,
+            padding: theme.spacing.md,
+            fontSize: 16,
+            color: theme.colors.text,
+            minHeight: multiline ? 100 : 48,
+          }}
+          placeholder={placeholder}
+          placeholderTextColor={theme.colors.textSecondary}
+          value={value}
+          onChangeText={onChangeText}
+          maxLength={maxLength}
+          multiline={multiline}
+          editable={editable}
+          secureTextEntry={isSecure}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          {...rest}
+        />
+        
+        {isPassword && (
+          <TouchableOpacity 
+            onPress={() => setIsSecure(!isSecure)} 
+            style={{ paddingHorizontal: theme.spacing.md, justifyContent: 'center' }}
+          >
+            <Ionicons 
+              name={isSecure ? "eye-off-outline" : "eye-outline"} 
+              size={22} 
+              color={theme.colors.textSecondary} 
+            />
+          </TouchableOpacity>
+        )}
+      </View>
 
       <View
         style={{

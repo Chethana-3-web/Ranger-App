@@ -1,25 +1,54 @@
-/**
- * Ranger App – Root Navigator
- *
- * Top-level navigation container.
- * Since there is no authentication flow, this goes directly to the
- * MainNavigator (bottom tabs).
- *
- * Mirrors the BinGo RootNavigator pattern without the auth split.
- */
-
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import MainNavigator from './MainNavigator';
+import { ActivityIndicator, View } from 'react-native';
+
+import { useAuth } from '../context/AuthContext';
+import theme from '../core/ui/theme';
+
+import OnboardingScreen from '../screens/auth/OnboardingScreen';
+import LoginScreen from '../screens/auth/LoginScreen';
+import RegisterScreen from '../screens/auth/RegisterScreen';
+
+import CommunityDashboard from '../screens/community/CommunityDashboard';
+import OfficerDashboard from '../screens/officer/OfficerDashboard';
+import ProfileScreen from '../screens/profile/ProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
-const RootNavigator = ({ onLongPressHeader: _onLongPressHeader }) => {
+export default function RootNavigator() {
+  const { user, loading, onboardingCompleted } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Main" component={MainNavigator} />
+      {!onboardingCompleted ? (
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      ) : user == null ? (
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+        </>
+      ) : (
+        <>
+          {user.role === 'officer' ? (
+            <Stack.Screen name="OfficerDashboard" component={OfficerDashboard} />
+          ) : (
+            <Stack.Screen name="CommunityDashboard" component={CommunityDashboard} />
+          )}
+          <Stack.Screen 
+            name="Profile" 
+            component={ProfileScreen} 
+            options={{ headerShown: true, headerTitle: 'Profile', headerStyle: { backgroundColor: theme.colors.primary }, headerTintColor: '#fff' }} 
+          />
+        </>
+      )}
     </Stack.Navigator>
   );
-};
-
-export default RootNavigator;
+}
