@@ -36,21 +36,39 @@ const INCIDENT_TYPE_LABELS = {
  * Map a raw Firestore incident document to the dashboard's incident shape.
  * Normalises nested location into top-level latitude/longitude for Leaflet.
  *
+ * Status logic:
+ *   The mobile app writes status: "PENDING_SYNC" when the incident is first
+ *   created, then marks it "SYNCED" only in AsyncStorage (local) — it never
+ *   writes the updated status back to Firestore. So every document that EXISTS
+ *   in Firestore was successfully uploaded → we treat it as "Received" on the
+ *   dashboard side rather than showing the raw "PENDING_SYNC" string.
+ *
  * @param {object} raw - plain JS object from Firestore
  * @returns {object}
  */
 function normaliseIncident(raw) {
-  // Location is stored as a nested object: { latitude, longitude, ... }
   const lat = raw.location?.latitude  ?? raw.latitude  ?? null;
   const lng = raw.location?.longitude ?? raw.longitude ?? null;
 
+  // Any document present in Firestore was successfully uploaded from the mobile
+  // app. Map the raw mobile status to a dashboard-friendly display label.
+  const STATUS_MAP = {
+    PENDING_SYNC: 'Received',   // in Firestore = it arrived
+    SYNCED:       'Synced',
+    FAILED:       'Failed',
+  };
+  const displayStatus = STATUS_MAP[raw.status] ?? raw.status ?? 'Received';
+
   return {
     ...raw,
-    latitude:  lat,
-    longitude: lng,
-    label: INCIDENT_TYPE_LABELS[raw.type] ?? raw.type ?? 'Incident',
-    // Provide a safe fallback severity (mobile app doesn't store severity yet)
-    severity: raw.severity ?? 'Unknown',
+    latitude:      lat,
+    longitude:     lng,
+    label:         INCIDENT_TYPE_LABELS[raw.type] ?? raw.type ?? 'Incident',
+    severity:      raw.severity ?? 'Unknown',
+    // Replace raw mobile status with dashboard-friendly label
+    status:        displayStatus,
+    // Keep the raw value available if needed
+    mobileStatus:  raw.status,
   };
 }
 

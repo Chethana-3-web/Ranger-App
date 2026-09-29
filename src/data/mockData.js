@@ -484,8 +484,10 @@ export const WILDLIFE_ALERTS = [
 
 export const SYNC_STATUS = {
   online: true,
-  lastSynced: '2 minutes ago',
-  pendingRecords: 2,
+  lastSynced: '—',
+  pendingRecords: 0,
+  // Note: dashboard topbar uses live SyncContext from useFirestoreIncidents,
+  // not this static value. This is kept for reference only.
 };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────

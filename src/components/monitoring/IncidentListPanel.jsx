@@ -90,7 +90,17 @@ export default function IncidentListPanel({ incidents, loading, selectedId, onSe
                 </span>
               </div>
               <div style={styles.statusRow}>
-                <span style={styles.status}>{inc.status ?? '—'}</span>
+                <span style={{
+                  ...styles.status,
+                  color: inc.status === 'Received' || inc.status === 'Synced' ? '#15803d'
+                    : inc.status === 'Failed' ? '#dc2626' : '#6b7280',
+                  fontStyle: 'normal',
+                  fontWeight: inc.status === 'Failed' ? 700 : 400,
+                }}>
+                  {inc.status === 'Received' ? '✓ Received' :
+                   inc.status === 'Synced'   ? '✓ Synced'   :
+                   inc.status === 'Failed'   ? '✗ Failed'   : inc.status ?? '—'}
+                </span>
                 <span style={styles.incId}>{inc.id}</span>
               </div>
             </button>

@@ -51,10 +51,14 @@ export function useFirestoreIncidents() {
   }, []);
 
   // Build a SyncStatusChip-compatible status object
+  // pendingRecords = number of FAILED incidents in Firestore
+  // (PENDING_SYNC in Firestore just means the mobile app wrote it — it arrived)
+  const failedCount = incidents.filter((i) => i.mobileStatus === 'FAILED').length;
+
   const syncStatus = {
     online:         error === null,
     lastSynced:     lastSynced ? `at ${lastSynced}` : 'connecting…',
-    pendingRecords: 0,
+    pendingRecords: failedCount,   // only truly failed records show as pending
     source:         error ? 'mock (offline fallback)' : 'Firestore',
   };
 
