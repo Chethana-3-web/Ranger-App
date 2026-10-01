@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -9,56 +9,37 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../core/config/firebase';
 
 
-const MyReports = ({ userId }) => {
-  const [reports, setReports] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        const q = query(collection(db, 'community_reports'), where('rangerId', '==', userId));
-        const snap = await getDocs(q);
-        const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        data.sort((a,b) => new Date(b.recordedAt) - new Date(a.recordedAt));
-        setReports(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (userId) fetchReports();
-  }, [userId]);
-
-  if (loading) return <ActivityIndicator size="small" color={COLORS.PRIMARY} style={{marginTop:20}} />;
-  if (reports.length === 0) return <View style={{marginTop: 20}}><Text style={styles.sectionLabel}>My Submitted Reports</Text><Text style={{color: COLORS.TEXT_SECONDARY, marginTop: 8}}>No reports submitted yet.</Text></View>;
-
-  return (
-    <View style={{marginTop: 20}}>
-      <Text style={styles.sectionLabel}>My Submitted Reports</Text>
-      {reports.map(r => (
-        <View key={r.id} style={styles.reportCard}>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={styles.reportType}>{r.type}</Text>
-            <Text style={[styles.reportStatus, r.status === 'NEEDS CLARIFICATION' && {color: '#f59e0b'}]}>{r.status === "PENDING_SYNC" ? "SUBMITTED" : r.status}</Text>
-          </View>
-          <Text style={styles.reportDate}>{new Date(r.recordedAt).toLocaleString()}</Text>
-          <Text style={styles.reportDesc} numberOfLines={2}>{r.description}</Text>
-          {r.officerMessage && (
-            <View style={styles.messageBox}>
-              <Text style={styles.messageLabel}>Message from Officer:</Text>
-              <Text style={styles.messageText}>{r.officerMessage}</Text>
-            </View>
-          )}
-        </View>
-      ))}
-    </View>
-  );
-};
-
 const CommunityHomeScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuth();
+  
+  const [reports, setReports] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const fetchReports = async () => {
+    try {
+      const q = query(collection(db, 'community_reports'), where('rangerId', '==', user?.id));
+      const snap = await getDocs(q);
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      data.sort((a,b) => new Date(b.recordedAt) - new Date(a.recordedAt));
+      setReports(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (user?.id) fetchReports();
+  }, [user?.id]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchReports();
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
@@ -72,7 +53,12 @@ const CommunityHomeScreen = () => {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView 
+        contentContainerStyle={styles.scroll}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.PRIMARY]} />
+        }
+      >
         <View style={styles.welcomeCard}>
           <Text style={styles.welcomeTitle}>Protect Our Wildlife</Text>
           <Text style={styles.welcomeText}>
@@ -94,8 +80,31 @@ const CommunityHomeScreen = () => {
             <Text style={styles.actionDesc}>Report snares, traps, or suspicious activities anonymously and safely.</Text>
           </View>
           <Ionicons name="chevron-forward" size={24} color={COLORS.TEXT_SECONDARY} />
-        </TouchableOpacity>
-        <MyReports userId={user?.id} />
+        </TouchableOpacity>        <View style={{marginTop: 20}}>
+          <Text style={styles.sectionLabel}>My Submitted Reports</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color={COLORS.PRIMARY} style={{marginTop:20}} />
+          ) : reports.length === 0 ? (
+            <Text style={{color: COLORS.TEXT_SECONDARY, marginTop: 8, marginLeft: 4}}>No reports submitted yet.</Text>
+          ) : (
+            reports.map(r => (
+              <View key={r.id} style={styles.reportCard}>
+                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                  <Text style={styles.reportType}>{r.type}</Text>
+                  <Text style={[styles.reportStatus, r.status === 'NEEDS CLARIFICATION' && {color: '#f59e0b'}]}>{r.status === "PENDING_SYNC" ? "SUBMITTED" : r.status}</Text>
+                </View>
+                <Text style={styles.reportDate}>{new Date(r.recordedAt).toLocaleString()}</Text>
+                <Text style={styles.reportDesc} numberOfLines={2}>{r.description}</Text>
+                {r.officerMessage && (
+                  <View style={styles.messageBox}>
+                    <Text style={styles.messageLabel}>Message from Officer:</Text>
+                    <Text style={styles.messageText}>{r.officerMessage}</Text>
+                  </View>
+                )}
+              </View>
+            ))
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -187,4 +196,5 @@ const styles = StyleSheet.create({
 });
 
 export default CommunityHomeScreen;
+
 
