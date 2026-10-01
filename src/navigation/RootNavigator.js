@@ -13,6 +13,16 @@ import CommunityDashboard from '../screens/community/CommunityDashboard';
 import OfficerDashboard from '../screens/officer/OfficerDashboard';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 
+import SubmitReportScreen from '../features/community-report/screens/SubmitReportScreen';
+import LocationSelectionScreen from '../features/community-report/screens/LocationSelectionScreen';
+import AddEvidenceScreen from '../features/community-report/screens/AddEvidenceScreen';
+import ReviewReportScreen from '../features/community-report/screens/ReviewReportScreen';
+import SubmissionSuccessScreen from '../features/community-report/screens/SubmissionSuccessScreen';
+import MyReportsScreen from '../features/community-report/screens/MyReportsScreen';
+import ReportDetailsScreen from '../features/community-report/screens/ReportDetailsScreen';
+import OfficerReportsScreen from '../features/community-report/screens/officer/OfficerReportsScreen';
+import OfficerReportDetailsScreen from '../features/community-report/screens/officer/OfficerReportDetailsScreen';
+
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigator() {
@@ -38,9 +48,22 @@ export default function RootNavigator() {
       ) : (
         <>
           {user.role === 'officer' ? (
-            <Stack.Screen name="OfficerDashboard" component={OfficerDashboard} />
+            <>
+              <Stack.Screen name="OfficerDashboard" component={OfficerDashboard} />
+              <Stack.Screen name="OfficerReports" component={OfficerReportsScreen} />
+              <Stack.Screen name="OfficerReportDetails" component={OfficerReportDetailsScreen} />
+            </>
           ) : (
-            <Stack.Screen name="CommunityDashboard" component={CommunityDashboard} />
+            <>
+              <Stack.Screen name="CommunityDashboard" component={CommunityDashboard} />
+              <Stack.Screen name="SubmitReport" component={SubmitReportScreen} />
+              <Stack.Screen name="LocationSelection" component={LocationSelectionScreen} />
+              <Stack.Screen name="AddEvidence" component={AddEvidenceScreen} />
+              <Stack.Screen name="ReviewReport" component={ReviewReportScreen} />
+              <Stack.Screen name="SubmissionSuccess" component={SubmissionSuccessScreen} />
+              <Stack.Screen name="MyReports" component={MyReportsScreen} />
+              <Stack.Screen name="ReportDetails" component={ReportDetailsScreen} />
+            </>
           )}
           <Stack.Screen 
             name="Profile" 

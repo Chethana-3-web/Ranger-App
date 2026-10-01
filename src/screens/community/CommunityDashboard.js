@@ -18,13 +18,13 @@ export default function CommunityDashboard({ navigation }) {
         <View style={styles.actions}>
           <PrimaryButton 
             label="Submit Community Report" 
-            onPress={() => console.log('Placeholder: Submit Report')} 
+            onPress={() => navigation.navigate('SubmitReport')} 
           />
           <View style={styles.spacer} />
           
           <SecondaryButton 
             label="My Reports" 
-            onPress={() => console.log('Placeholder: My Reports')} 
+            onPress={() => navigation.navigate('MyReports')} 
           />
           <View style={styles.spacer} />
           
