@@ -55,6 +55,8 @@ const diContainer = buildContainer();
 setDIContainer(diContainer);
 setServicesContainer(diContainer);
 
+import { SessionProvider } from '../core/session/SessionContext';
+
 const App = () => {
   const [simulatorPanelVisible, setSimulatorPanelVisible] = useState(false);
 
@@ -62,10 +64,12 @@ const App = () => {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AuthProvider>
-          <NavigationContainer>
-            <StatusBar barStyle="light-content" backgroundColor="#1B5E20" />
-            <RootNavigator onLongPressHeader={() => setSimulatorPanelVisible(true)} />
-          </NavigationContainer>
+          <SessionProvider>
+            <NavigationContainer>
+              <StatusBar barStyle="light-content" backgroundColor="#1B5E20" />
+              <RootNavigator onLongPressHeader={() => setSimulatorPanelVisible(true)} />
+            </NavigationContainer>
+          </SessionProvider>
         </AuthProvider>
 
         {__DEV__ && (

@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useSession } from '../core/session/SessionContext';
+import { useAuth } from '../context/AuthContext';
 import { getParkById } from '../core/config/parks';
 import AppHeader from '../core/ui/AppHeader';
 import COLORS from '../core/constants/colors';
@@ -17,7 +18,19 @@ import theme from '../core/ui/theme';
 
 const ProfileScreen = () => {
   const { ranger, patrol } = useSession();
+  const { user, logout } = useAuth();
   const park = getParkById(ranger.parkId);
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Confirm Logout",
+      "Are you sure you want to log out of the application?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Logout", style: "destructive", onPress: logout }
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
@@ -27,8 +40,8 @@ const ProfileScreen = () => {
           <View style={styles.avatar}>
             <Ionicons name="person" size={48} color={COLORS.PRIMARY} />
           </View>
-          <Text style={styles.rangerName}>{ranger.name}</Text>
-          <Text style={styles.rangerRole}>{ranger.role}</Text>
+          <Text style={styles.rangerName}>{user?.fullName || ranger.name}</Text>
+          <Text style={styles.rangerRole}>{user?.role || ranger.role}</Text>
         </View>
 
         <InfoRow icon="id-card-outline"          label="Ranger ID"       value={ranger.id} />
@@ -41,6 +54,11 @@ const ProfileScreen = () => {
           Ranger accounts are managed by the park operations dashboard.
           Contact your park manager to update profile details.
         </Text>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={20} color="#FFF" />
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -83,6 +101,21 @@ const styles = StyleSheet.create({
   infoLabel:  { fontSize: 11, color: COLORS.TEXT_SECONDARY, textTransform: 'uppercase', letterSpacing: 0.5 },
   infoValue:  { fontSize: 15, fontWeight: '600', color: COLORS.TEXT_PRIMARY, marginTop: 2 },
   note: { fontSize: 12, color: COLORS.TEXT_SECONDARY, textAlign: 'center', marginTop: 20, lineHeight: 18, paddingHorizontal: 16 },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.ERROR || '#d32f2f',
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 30,
+    gap: 8,
+  },
+  logoutText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '700',
+  }
 });
 
 export default ProfileScreen;

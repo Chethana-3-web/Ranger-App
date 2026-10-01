@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { collection, doc, setDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
+import { db } from '../core/config/firebase';
 
 const AuthContext = createContext();
 
@@ -31,54 +33,88 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    // Mock login logic
-    return new Promise((resolve, reject) => {
-      setTimeout(async () => {
-        if (email === 'officer@example.com' && password === 'Officer1!') {
-          const officerUser = { id: 'OFF-1', email, role: 'officer', fullName: 'Officer John' };
-          await AsyncStorage.setItem('@user', JSON.stringify(officerUser));
-          setUser(officerUser);
-          resolve(officerUser);
-        } else if (email && password) {
-          const storedUsers = await AsyncStorage.getItem('@registered_users');
-          const users = storedUsers ? JSON.parse(storedUsers) : [];
-          const foundUser = users.find(u => u.email === email && u.password === password);
-          
-          if (foundUser) {
-            const memberUser = { ...foundUser, role: 'community' };
-            await AsyncStorage.setItem('@user', JSON.stringify(memberUser));
-            setUser(memberUser);
-            resolve(memberUser);
-          } else {
-            reject(new Error('Invalid email or password.'));
+    return new Promise(async (resolve, reject) => {
+      const timeoutId = setTimeout(() => reject(new Error('Connection timed out. Did you enable Firestore in your Firebase Console?')), 10000);
+      try {
+        if (email === 'admin@example.com' && password === 'Admin1!') {
+          clearTimeout(timeoutId);
+          const adminUser = { id: 'ADM-1', email, role: 'admin', fullName: 'System Admin' };
+          await AsyncStorage.setItem('@user', JSON.stringify(adminUser));
+          setUser(adminUser);
+          return resolve(adminUser);
+        }
+
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('email', '==', email), where('password', '==', password));
+        const snapshot = await getDocs(q);
+        
+        clearTimeout(timeoutId);
+        if (!snapshot.empty) {
+          const foundUser = snapshot.docs[0].data();
+          if (foundUser.role === 'officer' && !foundUser.isVerified) {
+            return reject(new Error('Your Ranger Officer account is pending admin verification.'));
           }
+          await AsyncStorage.setItem('@user', JSON.stringify(foundUser));
+          setUser(foundUser);
+          resolve(foundUser);
         } else {
           reject(new Error('Invalid email or password.'));
         }
-      }, 1000);
+      } catch (e) {
+        clearTimeout(timeoutId);
+        reject(new Error('Network error logging in: ' + e.message));
+      }
     });
   };
 
   const register = async (userData) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(async () => {
-        try {
-          const storedUsers = await AsyncStorage.getItem('@registered_users');
-          const users = storedUsers ? JSON.parse(storedUsers) : [];
-          
-          if (users.find(u => u.email === userData.email)) {
-            reject(new Error('An account already exists with this email address.'));
-            return;
-          }
-          
-          users.push(userData);
-          await AsyncStorage.setItem('@registered_users', JSON.stringify(users));
-          resolve(userData);
-        } catch (e) {
-          reject(e);
+    return new Promise(async (resolve, reject) => {
+      const timeoutId = setTimeout(() => reject(new Error('Connection timed out. Did you enable Firestore in your Firebase Console?')), 10000);
+      try {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('email', '==', userData.email));
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+          clearTimeout(timeoutId);
+          return reject(new Error('An account already exists with this email address.'));
         }
-      }, 1000);
+        
+        const newUser = { 
+          ...userData, 
+          id: `USR-${Date.now()}`,
+          isVerified: userData.role === 'officer' ? false : true 
+        };
+        
+        await setDoc(doc(db, 'users', newUser.id), newUser);
+        clearTimeout(timeoutId);
+        resolve(newUser);
+      } catch (e) {
+        clearTimeout(timeoutId);
+        reject(new Error('Network error registering: ' + e.message));
+      }
     });
+  };
+
+  const getPendingOfficers = async () => {
+    try {
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('role', '==', 'officer'), where('isVerified', '==', false));
+      // Add manual timeout check
+      const snapshot = await Promise.race([
+        getDocs(q),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('Timeout')), 10000))
+      ]);
+      return snapshot.docs.map(doc => doc.data());
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  };
+
+  const verifyOfficer = async (userId) => {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, { isVerified: true });
   };
 
   const logout = async () => {
@@ -92,10 +128,12 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem('@user', JSON.stringify(updatedUser));
       setUser(updatedUser);
       
-      const storedUsers = await AsyncStorage.getItem('@registered_users');
-      let users = storedUsers ? JSON.parse(storedUsers) : [];
-      users = users.map(u => u.email === updatedUser.email ? { ...u, ...updates } : u);
-      await AsyncStorage.setItem('@registered_users', JSON.stringify(users));
+      try {
+        const userRef = doc(db, 'users', user.id);
+        await updateDoc(userRef, updates);
+      } catch (e) {
+        console.error('Failed to sync profile update to cloud:', e);
+      }
     }
   };
 
@@ -119,7 +157,9 @@ export const AuthProvider = ({ children }) => {
       logout,
       updateProfile,
       completeOnboarding,
-      resetOnboarding
+      resetOnboarding,
+      getPendingOfficers,
+      verifyOfficer
     }}>
       {children}
     </AuthContext.Provider>
