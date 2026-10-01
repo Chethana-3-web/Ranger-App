@@ -12,6 +12,7 @@ import { View, Text, ScrollView, Image, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useAuth } from '../../../../context/AuthContext';
 
 import { useSession } from '../../../../core/session/SessionContext';
 import { getParkById } from '../../../../core/config/parks';
@@ -34,6 +35,8 @@ const DetailsScreen = () => {
   const route = useRoute();
   const draftRepo = useDraftRepo();
   const { ranger, patrol } = useSession();
+  const { user } = useAuth();
+  const isCommunity = user?.role === 'community';
   const park = getParkById(ranger.parkId);
   const services = useIncidentServices();
 
@@ -63,13 +66,13 @@ const DetailsScreen = () => {
     setSaving(true);
 
     try {
-      const incident = await logIncident({
+      const incident = await logIncident({ reportType: isCommunity ? 'COMMUNITY' : 'PATROL',
         type:        draft.type,
         description,
         location:    draft.location,
         photoUri:    draft.photoUri ?? null,
-        rangerId:    ranger.id,
-        patrolId:    patrol.id,
+        rangerId: isCommunity ? user.id : ranger.id,
+        patrolId: isCommunity ? 'COMMUNITY-REPORT' : patrol.id,
         parkId:      ranger.parkId,
         park,
         incidentRepo:        services.incidentRepo,

@@ -51,10 +51,10 @@ export default function Sidebar() {
           })}
 
           <div className="nav-section-label" style={{ marginTop: 8 }}>System</div>
-          <span className="nav-item" style={{ opacity: 0.5, cursor: 'default' }}>
+          <a href="/settings" className={`nav-item${window.location.pathname === '/settings' ? ' active' : ''}`}>
             <Settings size={16} strokeWidth={1.8} />
             <span>Settings</span>
-          </span>
+          </a>
           <span className="nav-item" style={{ cursor: 'pointer', color: '#d32f2f' }} onClick={() => setShowLogoutModal(true)}>
             <LogOut size={16} strokeWidth={1.8} />
             <span>Log Out</span>

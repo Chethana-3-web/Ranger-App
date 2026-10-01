@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -23,7 +23,7 @@ import { ConfirmDialog } from '../../../../core/ui/ConfirmDialog';
 import theme from '../../../../core/ui/theme';
 import { useDraftRepo } from '../hooks/useDraftRepo';
 
-const TYPE_ICONS = {
+const TYPE_ICONS = { EMERGENCY: { icon: 'warning', color: '#D32F2F' },
   SNARE:    { icon: 'alert-circle', color: '#C62828' },
   CARCASS:  { icon: 'skull',        color: '#6D4C41' },
   TRACKS:   { icon: 'footsteps',    color: '#2E7D32' },
@@ -78,7 +78,12 @@ const IncidentTypeScreen = () => {
               <TouchableOpacity
                 key={key}
                 style={[styles.card, selected && styles.cardSelected]}
-                onPress={() => setSelectedType(key)}
+                onPress={() => {
+                  if (key === 'EMERGENCY') {
+                    Alert.alert('EMERGENCY', 'Please contact local authorities immediately at 119.', [{ text: 'OK' }]);
+                  }
+                  setSelectedType(key);
+                }}
                 activeOpacity={0.8}
                 accessibilityRole="radio"
                 accessibilityState={{ selected }}

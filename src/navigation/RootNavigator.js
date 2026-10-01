@@ -14,6 +14,7 @@ import OfficerDashboard from '../screens/officer/OfficerDashboard';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import AdminDashboard from '../screens/admin/AdminDashboard';
 import CommunityNavigator from './CommunityNavigator';
+import MainNavigator from './MainNavigator';
 
 const Stack = createNativeStackNavigator();
 

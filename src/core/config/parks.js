@@ -16,21 +16,21 @@ const PARKS = [
     name:   'Yala National Park',
     centre: { lat: 6.3728, lng: 81.5198 },
     // Open grassland / scrubland – full incident type set
-    enabledIncidentTypes: ['SNARE', 'CARCASS', 'CAMP', 'FOOTPRINT', 'OTHER'],
+    enabledIncidentTypes: ['EMERGENCY', 'SNARE', 'CARCASS', 'CAMPSITE', 'TRACKS', 'OTHER'],
   },
   {
     id:     'PARK-SINHARAJA',
     name:   'Sinharaja Forest Reserve',
     centre: { lat: 6.4052, lng: 80.4881 },
     // Dense jungle – illegal camps and snares are primary concerns; no open carcass finds
-    enabledIncidentTypes: ['SNARE', 'CAMP', 'FOOTPRINT', 'OTHER'],
+    enabledIncidentTypes: ['EMERGENCY', 'SNARE', 'CAMPSITE', 'TRACKS', 'OTHER'],
   },
   {
     id:     'PARK-UDAWALAWE',
     name:   'Udawalawe National Park',
     centre: { lat: 6.4745, lng: 80.8998 },
     // Elephant country – all types plus dedicated elephant-conflict footprint logging
-    enabledIncidentTypes: ['SNARE', 'CARCASS', 'CAMP', 'FOOTPRINT', 'OTHER'],
+    enabledIncidentTypes: ['EMERGENCY', 'SNARE', 'CARCASS', 'CAMPSITE', 'TRACKS', 'OTHER'],
   },
 ];
 

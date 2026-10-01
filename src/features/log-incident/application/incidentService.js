@@ -19,6 +19,7 @@ import { StorageError } from '../../../core/domain/errors';
 
 /**
  * @typedef {Object} LogIncidentParams
+ * @property {string}      [reportType]
  * @property {string}      type
  * @property {string}      description
  * @property {import('../../../core/domain/location').RangerLocation} location
@@ -60,7 +61,7 @@ export async function logIncident(params) {
   const id = await idGenerator.generate();
   const recordedAt = clock.iso();
 
-  let incident = createIncident({
+  let incident = createIncident({ reportType: params.reportType,
     id, type, description: description.trim(),
     location, photoUri, recordedAt,
     rangerId, patrolId, parkId,

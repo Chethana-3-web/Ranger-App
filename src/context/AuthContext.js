@@ -33,67 +33,55 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    return new Promise(async (resolve, reject) => {
-      const timeoutId = setTimeout(() => reject(new Error('Connection timed out. Did you enable Firestore in your Firebase Console?')), 10000);
-      try {
-        if (email === 'admin@example.com' && password === 'Admin1!') {
-          clearTimeout(timeoutId);
-          const adminUser = { id: 'ADM-1', email, role: 'admin', fullName: 'System Admin' };
-          await AsyncStorage.setItem('@user', JSON.stringify(adminUser));
-          setUser(adminUser);
-          return resolve(adminUser);
-        }
-
-        const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('email', '==', email), where('password', '==', password));
-        const snapshot = await getDocs(q);
-        
-        clearTimeout(timeoutId);
-        if (!snapshot.empty) {
-          const foundUser = snapshot.docs[0].data();
-          if (foundUser.role === 'officer' && !foundUser.isVerified) {
-            return reject(new Error('Your Ranger Officer account is pending admin verification.'));
-          }
-          await AsyncStorage.setItem('@user', JSON.stringify(foundUser));
-          setUser(foundUser);
-          resolve(foundUser);
-        } else {
-          reject(new Error('Invalid email or password.'));
-        }
-      } catch (e) {
-        clearTimeout(timeoutId);
-        reject(new Error('Network error logging in: ' + e.message));
+    try {
+      if (email === 'admin@example.com' && password === 'Admin1!') {
+        const adminUser = { id: 'ADM-1', email, role: 'admin', fullName: 'System Admin' };
+        await AsyncStorage.setItem('@user', JSON.stringify(adminUser));
+        setUser(adminUser);
+        return adminUser;
       }
-    });
+
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', email), where('password', '==', password));
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        const foundUser = snapshot.docs[0].data();
+        if (foundUser.role === 'officer' && !foundUser.isVerified) {
+          throw new Error('Your Ranger Officer account is pending admin verification.');
+        }
+        await AsyncStorage.setItem('@user', JSON.stringify(foundUser));
+        setUser(foundUser);
+        return foundUser;
+      } else {
+        throw new Error('Invalid email or password.');
+      }
+    } catch (e) {
+      throw new Error(e.message || 'Network error logging in');
+    }
   };
 
   const register = async (userData) => {
-    return new Promise(async (resolve, reject) => {
-      const timeoutId = setTimeout(() => reject(new Error('Connection timed out. Did you enable Firestore in your Firebase Console?')), 10000);
-      try {
-        const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('email', '==', userData.email));
-        const snapshot = await getDocs(q);
-        
-        if (!snapshot.empty) {
-          clearTimeout(timeoutId);
-          return reject(new Error('An account already exists with this email address.'));
-        }
-        
-        const newUser = { 
-          ...userData, 
-          id: `USR-${Date.now()}`,
-          isVerified: userData.role === 'officer' ? false : true 
-        };
-        
-        await setDoc(doc(db, 'users', newUser.id), newUser);
-        clearTimeout(timeoutId);
-        resolve(newUser);
-      } catch (e) {
-        clearTimeout(timeoutId);
-        reject(new Error('Network error registering: ' + e.message));
+    try {
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', userData.email));
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        throw new Error('An account already exists with this email address.');
       }
-    });
+      
+      const newUser = { 
+        ...userData, 
+        id: `USR-${Date.now()}`,
+        isVerified: userData.role === 'officer' ? false : true 
+      };
+      
+      await setDoc(doc(db, 'users', newUser.id), newUser);
+      return newUser;
+    } catch (e) {
+      throw new Error(e.message || 'Network error registering');
+    }
   };
 
   const getPendingOfficers = async () => {

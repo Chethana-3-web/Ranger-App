@@ -1,10 +1,60 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import COLORS from '../../core/constants/colors';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../core/config/firebase';
+
+
+const MyReports = ({ userId }) => {
+  const [reports, setReports] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const q = query(collection(db, 'community_reports'), where('rangerId', '==', userId));
+        const snap = await getDocs(q);
+        const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        data.sort((a,b) => new Date(b.recordedAt) - new Date(a.recordedAt));
+        setReports(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (userId) fetchReports();
+  }, [userId]);
+
+  if (loading) return <ActivityIndicator size="small" color={COLORS.PRIMARY} style={{marginTop:20}} />;
+  if (reports.length === 0) return <View style={{marginTop: 20}}><Text style={styles.sectionLabel}>My Submitted Reports</Text><Text style={{color: COLORS.TEXT_SECONDARY, marginTop: 8}}>No reports submitted yet.</Text></View>;
+
+  return (
+    <View style={{marginTop: 20}}>
+      <Text style={styles.sectionLabel}>My Submitted Reports</Text>
+      {reports.map(r => (
+        <View key={r.id} style={styles.reportCard}>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={styles.reportType}>{r.type}</Text>
+            <Text style={[styles.reportStatus, r.status === 'NEEDS CLARIFICATION' && {color: '#f59e0b'}]}>{r.status === "PENDING_SYNC" ? "SUBMITTED" : r.status}</Text>
+          </View>
+          <Text style={styles.reportDate}>{new Date(r.recordedAt).toLocaleString()}</Text>
+          <Text style={styles.reportDesc} numberOfLines={2}>{r.description}</Text>
+          {r.officerMessage && (
+            <View style={styles.messageBox}>
+              <Text style={styles.messageLabel}>Message from Officer:</Text>
+              <Text style={styles.messageText}>{r.officerMessage}</Text>
+            </View>
+          )}
+        </View>
+      ))}
+    </View>
+  );
+};
 
 const CommunityHomeScreen = () => {
   const navigation = useNavigation();
@@ -45,6 +95,7 @@ const CommunityHomeScreen = () => {
           </View>
           <Ionicons name="chevron-forward" size={24} color={COLORS.TEXT_SECONDARY} />
         </TouchableOpacity>
+        <MyReports userId={user?.id} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -121,7 +172,19 @@ const styles = StyleSheet.create({
   },
   actionDesc: {
     fontSize: 13, color: COLORS.TEXT_SECONDARY, lineHeight: 18,
-  }
+  },
+  reportCard: {
+    backgroundColor: COLORS.SURFACE, borderRadius: 12, padding: 16, marginBottom: 12,
+    borderWidth: 1, borderColor: COLORS.BORDER,
+  },
+  reportType: { fontSize: 16, fontWeight: 'bold', color: COLORS.TEXT_PRIMARY },
+  reportStatus: { fontSize: 12, fontWeight: 'bold', color: COLORS.PRIMARY, marginTop: 2 },
+  reportDate: { fontSize: 12, color: COLORS.TEXT_SECONDARY, marginVertical: 4 },
+  reportDesc: { fontSize: 14, color: COLORS.TEXT_PRIMARY },
+  messageBox: { marginTop: 12, backgroundColor: '#fef3c7', padding: 12, borderRadius: 8 },
+  messageLabel: { fontSize: 12, fontWeight: 'bold', color: '#b45309', marginBottom: 4 },
+  messageText: { fontSize: 14, color: '#92400e' },
 });
 
 export default CommunityHomeScreen;
+

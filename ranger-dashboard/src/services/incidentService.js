@@ -25,6 +25,7 @@ import { db } from './firebase.js';
 
 /** Human-readable labels matching the mobile app's IncidentType enum */
 const INCIDENT_TYPE_LABELS = {
+  EMERGENCY:'EMERGENCY INCIDENT',
   SNARE:    'Snare / Trap',
   CARCASS:  'Animal Carcass',
   TRACKS:   'Animal Tracks',
@@ -115,4 +116,29 @@ export async function fetchIncidentsByPark(parkId) {
   );
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => normaliseIncident(doc.data()));
+}
+
+/**
+ * Subscribe to live community reports from Firestore.
+ */
+export function subscribeToCommunityReports(callback) {
+  const q = query(
+    collection(db, 'community_reports')
+  );
+
+  const unsub = onSnapshot(
+    q,
+    (snapshot) => {
+      let reports = snapshot.docs.map((doc) => normaliseIncident(doc.data()));
+      // Sort client-side to avoid requiring a composite index in Firestore
+      reports.sort((a, b) => new Date(b.recordedAt) - new Date(a.recordedAt));
+      callback({ data: reports, error: null, loading: false });
+    },
+    (error) => {
+      console.error('[incidentService] Firestore error:', error);
+      callback({ data: [], error: error.message, loading: false });
+    },
+  );
+
+  return unsub;
 }
