@@ -4,9 +4,9 @@
  * Application service for flagging suspicious activity.
  */
 
-import { markAsFlagged } from '../domain/cameraTrapImage';
+import { markAsFlagged, markHumanActivityReviewed } from '../domain/cameraTrapImage';
 import { createSuspiciousActivity } from '../domain/suspiciousActivity';
-import { DefaultIdGenerator } from '../../core/services/idGenerator';
+import { DefaultIdGenerator } from '../../../core/services/idGenerator';
 
 /**
  * Create suspicious activity service.
@@ -14,11 +14,13 @@ import { DefaultIdGenerator } from '../../core/services/idGenerator';
  * @param {Object} deps
  * @param {import('../ports/ImageRepository').ImageRepository} deps.imageRepo
  * @param {import('../ports/CameraTrapGateway').CameraTrapGateway} deps.gateway
+ * @param {{ generate: () => Promise<string> }} [deps.idGenerator]
  */
-export function createSuspiciousActivityService({ imageRepo, gateway }) {
+export function createSuspiciousActivityService({ imageRepo, gateway, idGenerator = DefaultIdGenerator }) {
   return {
     /**
-     * Save suspicious activity flag.
+     * Save a human activity review.
+     * Only a "suspicious" decision flags the image for enforcement review.
      */
     async saveSuspiciousFlag(imageId, activityData, reviewedBy) {
       const image = await imageRepo.getById(imageId);
@@ -28,14 +30,15 @@ export function createSuspiciousActivityService({ imageRepo, gateway }) {
 
       // Create suspicious activity domain object
       const suspiciousActivity = createSuspiciousActivity({
-        id: DefaultIdGenerator.generate(),
+        id: await idGenerator.generate(),
         imageId,
         ...activityData,
         reviewedBy,
       });
 
-      // Mark image as flagged
-      const updatedImage = markAsFlagged(image, suspiciousActivity);
+      const updatedImage = suspiciousActivity.isSuspicious
+        ? markAsFlagged(image, suspiciousActivity)
+        : markHumanActivityReviewed(image, suspiciousActivity);
 
       // Save locally
       await imageRepo.save(updatedImage);

@@ -37,9 +37,6 @@ import DetailsScreen         from '../features/log-incident/ui/screens/DetailsSc
 import SavedScreen           from '../features/log-incident/ui/screens/SavedScreen';
 import SyncStatusScreen      from '../features/log-incident/ui/screens/SyncStatusScreen';
 
-// Camera Trap feature screens
-import CameraTrapListScreen  from '../features/camera-trap/ui/screens/CameraTrapListScreen';
-
 const Tab   = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -48,7 +45,6 @@ const TAB_ICONS = {
   Home:      { active: 'home',          inactive: 'home-outline' },
   Incidents: { active: 'clipboard',     inactive: 'clipboard-outline' },
   Alerts:    { active: 'notifications', inactive: 'notifications-outline' },
-  CameraTraps: { active: 'camera',      inactive: 'camera-outline' },
   Profile:   { active: 'person',        inactive: 'person-outline' },
 };
 
@@ -110,7 +106,6 @@ const MainNavigator = () => {
     >
       <Tab.Screen name="Home"      component={HomeScreen}     options={{ tabBarLabel: 'Home' }} />
       <Tab.Screen name="Incidents" component={IncidentStack}  options={{ tabBarLabel: 'Incidents' }} />
-      <Tab.Screen name="CameraTraps" component={CameraTrapListScreen} options={{ tabBarLabel: 'Camera Traps' }} />
       <Tab.Screen name="Alerts"    component={AlertsScreen}   options={{ tabBarLabel: 'Alerts' }} />
       <Tab.Screen name="Profile"   component={ProfileScreen}  options={{ tabBarLabel: 'Profile' }} />
     </Tab.Navigator>

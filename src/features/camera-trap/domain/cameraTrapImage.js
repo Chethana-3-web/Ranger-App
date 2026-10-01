@@ -63,11 +63,14 @@ export function createCameraTrapImage({
 
 /**
  * Mark image as classified.
+ * A flagged image stays flagged, so classifying wildlife never clears a flag.
  */
 export function markAsClassified(image, classification) {
   return createCameraTrapImage({
     ...image,
-    reviewStatus: ReviewStatus.CLASSIFIED,
+    reviewStatus: image.reviewStatus === ReviewStatus.FLAGGED
+      ? ReviewStatus.FLAGGED
+      : ReviewStatus.CLASSIFIED,
     classification,
     reviewedAt: new Date().toISOString(),
   });
@@ -80,6 +83,22 @@ export function markAsUnclear(image) {
   return createCameraTrapImage({
     ...image,
     reviewStatus: ReviewStatus.UNCLEAR,
+    reviewedAt: new Date().toISOString(),
+  });
+}
+
+/**
+ * Record a human activity review that did not end in a flag.
+ * "unclear" moves the image to UNCLEAR; "not_suspicious" keeps its review status,
+ * so no enforcement review is created.
+ */
+export function markHumanActivityReviewed(image, suspiciousActivity) {
+  return createCameraTrapImage({
+    ...image,
+    reviewStatus: suspiciousActivity.decision === 'unclear'
+      ? ReviewStatus.UNCLEAR
+      : image.reviewStatus,
+    suspiciousActivity,
     reviewedAt: new Date().toISOString(),
   });
 }

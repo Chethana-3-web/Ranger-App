@@ -2,82 +2,72 @@
  * Camera Trap List Screen
  * 
  * Displays all camera traps with pending images for review.
- * Only accessible by Park Manager or Researcher roles.
+ * Only accessible by the Park Manager role.
  */
 
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../../../context/AuthContext';
-import { ScreenContainer } from '../../../../core/ui/ScreenContainer';
-import { AppHeader } from '../../../../core/ui/AppHeader';
-import { Card } from '../../../../core/ui/Card';
+import AppHeader from '../../../../core/ui/AppHeader';
 import COLORS from '../../../../core/constants/colors';
-
-// Mock camera trap data for testing
-const MOCK_CAMERA_TRAPS = [
-  {
-    id: 'CT-001',
-    name: 'North Trail Camera',
-    location: { lat: 6.4281, lng: 81.3295, name: 'North Trail Intersection' },
-    pendingImageCount: 8,
-    status: 'active',
-    lastImageAt: '2026-09-28T14:30:00.000Z',
-  },
-  {
-    id: 'CT-002',
-    name: 'Waterhole Camera',
-    location: { lat: 6.4290, lng: 81.3310, name: 'Main Waterhole' },
-    pendingImageCount: 12,
-    status: 'active',
-    lastImageAt: '2026-09-28T16:45:00.000Z',
-  },
-  {
-    id: 'CT-003',
-    name: 'South Border Camera',
-    location: { lat: 6.4260, lng: 81.3280, name: 'South Border Fence' },
-    pendingImageCount: 5,
-    status: 'active',
-    lastImageAt: '2026-09-27T22:15:00.000Z',
-  },
-];
+import { canReviewCameraTraps } from '../../domain/permissions';
+import { loadCameraTrapsWithPendingCounts } from '../cameraTrapServices';
 
 export default function CameraTrapListScreen({ navigation }) {
   const { user } = useAuth();
+  const [cameraTraps, setCameraTraps] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Reload on focus so pending counts reflect reviews just saved
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      loadCameraTrapsWithPendingCounts().then((data) => {
+        if (active) {
+          setCameraTraps(data);
+          setLoading(false);
+        }
+      });
+      return () => { active = false; };
+    }, [])
+  );
 
   // Check if user has permission
   if (!user) {
     return (
-      <ScreenContainer>
-        <AppHeader title="Camera Traps" showBackButton={false} />
+      <View style={styles.screen}>
+        <AppHeader title="Camera Traps" onBack={() => navigation.goBack()} />
         <View style={styles.accessDeniedContainer}>
           <Text style={styles.accessDeniedTitle}>Login Required</Text>
           <Text style={styles.accessDeniedText}>
             Please login to access Camera Trap Review
           </Text>
         </View>
-      </ScreenContainer>
+      </View>
     );
   }
 
-  if (user.role !== 'park_manager' && user.role !== 'researcher') {
+  if (!canReviewCameraTraps(user)) {
     return (
-      <ScreenContainer>
-        <AppHeader title="Camera Traps" showBackButton={false} />
+      <View style={styles.screen}>
+        <AppHeader title="Camera Traps" onBack={() => navigation.goBack()} />
         <View style={styles.accessDeniedContainer}>
           <Text style={styles.accessDeniedTitle}>Access Denied</Text>
           <Text style={styles.accessDeniedText}>
-            Camera Trap Review is only accessible to Park Managers and Researchers.
+            Camera Trap Review is only accessible to Park Managers.
           </Text>
           <Text style={styles.currentRoleText}>Your role: {user.role}</Text>
         </View>
-      </ScreenContainer>
+      </View>
     );
   }
 
   const handleCameraTrapPress = (cameraTrap) => {
-    // TODO: Navigate to CameraTrapImagesScreen
-    console.log('Selected camera trap:', cameraTrap.id);
-    alert(`Camera Trap: ${cameraTrap.name}\nPending: ${cameraTrap.pendingImageCount} images`);
+    navigation.navigate('CameraTrapImages', {
+      cameraTrapId: cameraTrap.id,
+      cameraTrapName: cameraTrap.name,
+    });
   };
 
   const renderCameraTrap = ({ item }) => (
@@ -115,28 +105,36 @@ export default function CameraTrapListScreen({ navigation }) {
   );
 
   return (
-    <ScreenContainer>
-      <AppHeader title="Camera Traps" showBackButton={false} />
-      
+    <View style={styles.screen}>
+      <AppHeader title="Camera Traps" onBack={() => navigation.goBack()} />
+
       <View style={styles.container}>
         <View style={styles.headerSection}>
           <Text style={styles.welcomeText}>Welcome, {user.fullName}</Text>
           <Text style={styles.roleText}>Role: {user.role}</Text>
         </View>
 
-        <FlatList
-          data={MOCK_CAMERA_TRAPS}
-          renderItem={renderCameraTrap}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
+        {loading ? (
+          <ActivityIndicator style={styles.loader} size="large" color={COLORS.PRIMARY} />
+        ) : (
+          <FlatList
+            data={cameraTraps}
+            renderItem={renderCameraTrap}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
       </View>
-    </ScreenContainer>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: COLORS.BACKGROUND,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.BACKGROUND,
@@ -159,6 +157,9 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
+  },
+  loader: {
+    marginTop: 32,
   },
   cameraTrapCard: {
     backgroundColor: COLORS.SURFACE,

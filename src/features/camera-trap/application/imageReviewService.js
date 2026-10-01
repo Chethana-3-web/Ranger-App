@@ -21,14 +21,27 @@ export function createImageReviewService({ imageRepo, gateway }) {
      * Get images for a camera trap.
      */
     async getImagesByCameraTrapId(cameraTrapId) {
-      // Load from gateway (mock data for now)
-      const images = await gateway.getCameraTrapImages(cameraTrapId);
-      
-      // Save to local storage
-      for (const img of images) {
-        await imageRepo.save(img);
+      let remoteImages;
+      try {
+        // Load from gateway (mock data for now)
+        remoteImages = await gateway.getCameraTrapImages(cameraTrapId);
+      } catch (err) {
+        console.error('Failed to load images from gateway:', err);
+        return await imageRepo.getByCameraTrapId(cameraTrapId);
       }
-      
+
+      // Local copies win, so reviews saved on this device are not overwritten
+      const images = [];
+      for (const img of remoteImages) {
+        const local = await imageRepo.getById(img.id);
+        if (local) {
+          images.push(local);
+        } else {
+          await imageRepo.save(img);
+          images.push(img);
+        }
+      }
+
       return images;
     },
 

@@ -9,7 +9,7 @@
 
 ## Feature Overview
 
-**Review Camera Trap Images** enables Park Managers and Researchers to review images uploaded from camera traps deployed throughout the park. Reviewers can identify wildlife species, record animal counts, and flag suspicious human activity for enforcement review.
+**Review Camera Trap Images** enables Park Managers to review images uploaded from camera traps deployed throughout the park. Reviewers can identify wildlife species, record animal counts, and flag suspicious human activity for enforcement review.
 
 This feature operates offline-first and follows the same architectural patterns established by `src/features/log-incident/`.
 
@@ -17,10 +17,9 @@ This feature operates offline-first and follows the same architectural patterns 
 
 ## Primary Actors
 
-- **Park Manager** (primary reviewer role for current implementation)
-- **Researcher** (secondary reviewer role)
+- **Park Manager** (the only reviewer role)
 
-For development purposes, **Park Manager** is the main reviewer. The current seeded session does not implement authentication; future User Management will control access.
+**Park Manager** is the only role that can access Camera Trap Review. The current seeded session does not implement authentication; future User Management will control access.
 
 ---
 
@@ -71,7 +70,7 @@ currentUser
   ↓
 Role / Permission Check
   ↓
-if (user.role === "park_manager" || user.role === "researcher")
+if (user.role === "park_manager")
   ↓
 Camera Trap Review Screens
 ```
@@ -90,7 +89,7 @@ The screens created now will continue working after User Management is added.
 ### UC-05: Review Camera Trap Images
 
 **Description:**  
-A Park Manager or Researcher reviews images uploaded from camera traps to identify wildlife and record species information. If an image contains suspicious human activity, the reviewer can flag the image for future enforcement review.
+A Park Manager reviews images uploaded from camera traps to identify wildlife and record species information. If an image contains suspicious human activity, the reviewer can flag the image for future enforcement review.
 
 ---
 

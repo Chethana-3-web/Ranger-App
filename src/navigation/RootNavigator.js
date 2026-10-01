@@ -11,11 +11,12 @@ import RegisterScreen from '../screens/auth/RegisterScreen';
 
 import CommunityDashboard from '../screens/community/CommunityDashboard';
 import OfficerDashboard from '../screens/officer/OfficerDashboard';
-import CameraTrapDashboard from '../screens/CameraTrapDashboard';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import AdminDashboard from '../screens/admin/AdminDashboard';
 import CommunityNavigator from './CommunityNavigator';
 import MainNavigator from './MainNavigator';
+import CameraTrapNavigator from './CameraTrapNavigator';
+import { canReviewCameraTraps } from '../features/camera-trap/domain/permissions';
 
 const Stack = createNativeStackNavigator();
 
@@ -45,8 +46,8 @@ export default function RootNavigator() {
             <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
           ) : user.role === 'officer' ? (
             <Stack.Screen name="OfficerDashboard" component={MainNavigator} />
-          ) : user.role === 'park_manager' || user.role === 'researcher' ? (
-            <Stack.Screen name="CameraTrapDashboard" component={CameraTrapDashboard} />
+          ) : canReviewCameraTraps(user) ? (
+            <Stack.Screen name="CameraTrapDashboard" component={CameraTrapNavigator} />
           ) : (
             <Stack.Screen name="CommunityDashboard" component={CommunityNavigator} />
           )}

@@ -1,158 +1,232 @@
 /**
- * Camera Trap Dashboard (Temporary Placeholder)
- * 
- * Entry screen for Park Managers and Researchers.
- * This is a placeholder until the full Camera Trap feature is implemented.
+ * Camera Trap Dashboard
+ *
+ * Entry screen for Park Managers.
+ * Shows a summary of camera traps and the entry point to Camera Trap Review.
  */
 
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer } from '../core/ui/ScreenContainer';
-import { PrimaryButton } from '../core/ui/PrimaryButton';
-import { SecondaryButton } from '../core/ui/SecondaryButton';
 import { useAuth } from '../context/AuthContext';
 import theme from '../core/ui/theme';
 import COLORS from '../core/constants/colors';
+import { loadCameraTrapsWithPendingCounts } from '../features/camera-trap/ui/cameraTrapServices';
+
+const REVIEW_STEPS = [
+  { icon: 'images-outline', label: 'Pick a camera trap and open an image' },
+  { icon: 'paw-outline', label: 'Classify the wildlife: species and count' },
+  { icon: 'warning-outline', label: 'Flag suspicious human activity' },
+];
 
 export default function CameraTrapDashboard({ navigation }) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const [cameraTraps, setCameraTraps] = useState(null);
 
-  const handleLogout = async () => {
-    await logout();
-  };
+  // Reload on focus so pending counts reflect reviews just saved
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      loadCameraTrapsWithPendingCounts().then((data) => {
+        if (active) setCameraTraps(data);
+      });
+      return () => { active = false; };
+    }, [])
+  );
+
+  const cameraCount = cameraTraps ? cameraTraps.length : '–';
+  const pendingCount = cameraTraps
+    ? cameraTraps.reduce((sum, ct) => sum + ct.pendingImageCount, 0)
+    : '–';
 
   return (
-    <ScreenContainer>
-      <View style={styles.container}>
+    <ScreenContainer padded={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.greeting}>Welcome, {user?.fullName || 'User'}</Text>
-          <Text style={styles.role}>
-            {user?.role === 'park_manager' ? 'Park Manager' : 'Researcher'}
-          </Text>
-          <Text style={styles.subtitle}>Camera Trap Review System</Text>
-        </View>
-
-        <View style={styles.content}>
-          <View style={styles.infoBox}>
-            <Text style={styles.infoTitle}>✅ Login Successful!</Text>
-            <Text style={styles.infoText}>
-              You are logged in as a {user?.role === 'park_manager' ? 'Park Manager' : 'Researcher'}.
-            </Text>
-            <Text style={styles.infoText}>
-              Park: {user?.parkId || 'Not assigned'}
-            </Text>
-          </View>
-
-          <View style={styles.placeholder}>
-            <Text style={styles.placeholderTitle}>🎯 Camera Trap Feature</Text>
-            <Text style={styles.placeholderText}>
-              The Camera Trap Review screens will be implemented here.
-            </Text>
-            <Text style={styles.placeholderText}>
-              Upcoming features:
-            </Text>
-            <Text style={styles.featureItem}>• View Camera Traps</Text>
-            <Text style={styles.featureItem}>• Review Images</Text>
-            <Text style={styles.featureItem}>• Classify Wildlife</Text>
-            <Text style={styles.featureItem}>• Flag Suspicious Activity</Text>
+          <Text style={styles.greetingLabel}>Welcome back</Text>
+          <Text style={styles.greeting} numberOfLines={2}>{user?.fullName || 'User'}</Text>
+          <View style={styles.headerMeta}>
+            <View style={styles.chip}>
+              <Ionicons name="shield-checkmark" size={14} color={COLORS.TEXT_INVERSE} />
+              <Text style={styles.chipText}>Park Manager</Text>
+            </View>
+            <View style={styles.chip}>
+              <Ionicons name="location" size={14} color={COLORS.TEXT_INVERSE} />
+              <Text style={styles.chipText}>{user?.parkId || 'No park assigned'}</Text>
+            </View>
           </View>
         </View>
 
-        <View style={styles.actions}>
-          <SecondaryButton
-            label="View Profile"
-            onPress={() => navigation.navigate('Profile')}
-          />
-          <View style={styles.spacer} />
-          <PrimaryButton
-            label="Logout"
-            onPress={handleLogout}
-          />
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Ionicons name="camera-outline" size={22} color={COLORS.PRIMARY} />
+            <Text style={styles.statValue}>{cameraCount}</Text>
+            <Text style={styles.statLabel}>Camera traps</Text>
+          </View>
+          <View style={styles.statSpacer} />
+          <View style={styles.statCard}>
+            <Ionicons name="time-outline" size={22} color={COLORS.ACCENT} />
+            <Text style={styles.statValue}>{pendingCount}</Text>
+            <Text style={styles.statLabel}>Pending images</Text>
+          </View>
         </View>
-      </View>
+
+        <Text style={styles.sectionTitle}>Camera Trap Review</Text>
+        <TouchableOpacity
+          style={styles.actionCard}
+          onPress={() => navigation.navigate('CameraTrapList')}
+          activeOpacity={0.7}
+        >
+          <View style={styles.actionIcon}>
+            <Ionicons name="camera" size={24} color={COLORS.TEXT_INVERSE} />
+          </View>
+          <View style={styles.actionBody}>
+            <Text style={styles.actionTitle}>View Camera Traps</Text>
+            <Text style={styles.actionSubtitle}>Review the pending images of each camera</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={22} color={COLORS.TEXT_SECONDARY} />
+        </TouchableOpacity>
+
+        <Text style={styles.sectionTitle}>How review works</Text>
+        <View style={styles.card}>
+          {REVIEW_STEPS.map((feature, index) => (
+            <View
+              key={feature.label}
+              style={[styles.featureRow, index > 0 && styles.featureRowDivider]}
+            >
+              <Ionicons name={feature.icon} size={20} color={COLORS.TEXT_SECONDARY} />
+              <Text style={styles.featureLabel}>{feature.label}</Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: theme.spacing.lg,
+  scrollContent: {
+    padding: theme.spacing.md,
+    paddingBottom: theme.spacing.xl,
   },
   header: {
-    alignItems: 'center',
-    marginTop: theme.spacing.xl,
-    marginBottom: theme.spacing.xxl,
+    backgroundColor: COLORS.PRIMARY,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
+    ...theme.shadow.md,
+  },
+  greetingLabel: {
+    ...theme.typography.bodySmall,
+    color: COLORS.TEXT_INVERSE,
+    opacity: 0.8,
   },
   greeting: {
-    ...theme.typography.heading1,
-    color: COLORS.PRIMARY,
+    ...theme.typography.heading2,
+    color: COLORS.TEXT_INVERSE,
+    marginTop: theme.spacing.xs,
+  },
+  headerMeta: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: theme.spacing.md,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: theme.borderRadius.full,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: theme.spacing.sm,
     marginBottom: theme.spacing.xs,
   },
-  role: {
-    ...theme.typography.body,
-    fontSize: 16,
+  chipText: {
+    ...theme.typography.caption,
     fontWeight: '600',
-    color: COLORS.PRIMARY_LIGHT,
+    color: COLORS.TEXT_INVERSE,
+    marginLeft: 6,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    marginTop: theme.spacing.md,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: COLORS.SURFACE,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.md,
+    ...theme.shadow.sm,
+  },
+  statSpacer: {
+    width: theme.spacing.md,
+  },
+  statValue: {
+    ...theme.typography.heading1,
+    color: COLORS.TEXT_PRIMARY,
+    marginTop: theme.spacing.sm,
+  },
+  statLabel: {
+    ...theme.typography.bodySmall,
+    color: COLORS.TEXT_SECONDARY,
+  },
+  sectionTitle: {
+    ...theme.typography.bodySmall,
+    fontWeight: '700',
+    color: COLORS.TEXT_SECONDARY,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: theme.spacing.lg,
     marginBottom: theme.spacing.sm,
   },
-  subtitle: {
-    ...theme.typography.body,
-    color: theme.colors.textSecondary,
+  actionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.SURFACE,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.md,
+    ...theme.shadow.sm,
   },
-  content: {
-    flex: 1,
+  actionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.PRIMARY_LIGHT,
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  infoBox: {
-    backgroundColor: COLORS.SUCCESS + '10',
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.SUCCESS,
-    padding: theme.spacing.lg,
-    borderRadius: 8,
-    marginBottom: theme.spacing.xl,
+  actionBody: {
+    flex: 1,
+    marginHorizontal: theme.spacing.md,
   },
-  infoTitle: {
+  actionTitle: {
     ...theme.typography.body,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.SUCCESS,
-    marginBottom: theme.spacing.sm,
+    fontWeight: '600',
+    color: COLORS.TEXT_PRIMARY,
   },
-  infoText: {
-    ...theme.typography.body,
-    color: theme.colors.textPrimary,
-    marginBottom: theme.spacing.xs,
+  actionSubtitle: {
+    ...theme.typography.bodySmall,
+    color: COLORS.TEXT_SECONDARY,
   },
-  placeholder: {
+  card: {
     backgroundColor: COLORS.SURFACE,
-    borderWidth: 2,
-    borderColor: COLORS.BORDER,
-    borderRadius: 12,
-    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.lg,
+    paddingHorizontal: theme.spacing.md,
+    ...theme.shadow.sm,
   },
-  placeholderTitle: {
-    ...theme.typography.body,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.PRIMARY,
-    marginBottom: theme.spacing.md,
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
   },
-  placeholderText: {
-    ...theme.typography.body,
-    color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.sm,
+  featureRowDivider: {
+    borderTopWidth: 1,
+    borderTopColor: COLORS.DIVIDER,
   },
-  featureItem: {
+  featureLabel: {
     ...theme.typography.body,
-    color: theme.colors.textPrimary,
+    color: COLORS.TEXT_SECONDARY,
     marginLeft: theme.spacing.md,
-    marginBottom: theme.spacing.xs,
-  },
-  actions: {
-    marginTop: theme.spacing.xl,
-  },
-  spacer: {
-    height: theme.spacing.md,
   },
 });
