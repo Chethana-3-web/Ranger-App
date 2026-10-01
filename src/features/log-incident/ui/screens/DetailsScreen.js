@@ -106,7 +106,7 @@ const DetailsScreen = () => {
       <AppHeader
         title="Incident Details"
         subtitle="Step 4 of 4"
-        onBack={() => navigation.goBack()}
+        onBack={() => setShowCancelDialog(true)}
       />
       <OfflineBanner />
 

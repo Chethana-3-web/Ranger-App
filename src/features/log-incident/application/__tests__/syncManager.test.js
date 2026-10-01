@@ -194,3 +194,56 @@ describe('start (connectivity observer)', () => {
     unsub();
   });
 });
+
+// ── retry cap and idempotency guarantees ─────────────────────────────────────
+
+describe('syncManager – retry cap and idempotency', () => {
+  test('syncManager_afterMaxAttempts_stopsAutoRetryingAndMarksFailed', async () => {
+    // Arrange – incident already at 4 attempts (one below the cap)
+    let incident = baseIncident('INC-CAP');
+    for (let i = 0; i < MAX_SYNC_ATTEMPTS - 1; i++) {
+      incident = recordFailedAttempt(incident, 'err', fakeClock);
+    }
+    expect(incident.syncAttempts).toBe(MAX_SYNC_ATTEMPTS - 1);
+
+    // One more failure should push it to FAILED
+    const repo    = makeRepo([incident]);
+    const gateway = makeGateway('ERROR');
+    const sm = createSyncManager({
+      incidentRepo: repo, gateway,
+      connectivityMonitor: FakeConnectivityMonitor(true),
+      clock: fakeClock, scheduler: immediateScheduler,
+    });
+
+    await sm.syncNow();
+
+    const updated = repo._get('INC-CAP');
+    expect(updated.status).toBe(SyncStatus.FAILED);
+    expect(updated.syncAttempts).toBe(MAX_SYNC_ATTEMPTS);
+
+    // Calling syncNow again must NOT call the gateway again
+    gateway.calls.length = 0;
+    await sm.syncNow();
+    expect(gateway.calls).toHaveLength(0);
+  });
+
+  test('syncManager_whenGatewayReturnsAlreadyExists_marksSyncedWithoutError', async () => {
+    // Arrange – incident that was already uploaded (idempotent replay)
+    const incident = baseIncident('INC-DUP');
+    const repo     = makeRepo([incident]);
+    const gateway  = makeGateway('ALREADY_EXISTS');
+    const sm = createSyncManager({
+      incidentRepo: repo, gateway,
+      connectivityMonitor: FakeConnectivityMonitor(true),
+      clock: fakeClock, scheduler: immediateScheduler,
+    });
+
+    // Act
+    await sm.syncNow();
+
+    // Assert – treated exactly like STORED
+    const updated = repo._get('INC-DUP');
+    expect(updated.status).toBe(SyncStatus.SYNCED);
+    expect(updated.syncAttempts).toBe(0);
+  });
+});
