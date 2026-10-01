@@ -12,6 +12,7 @@ import { View, Text, ScrollView, Image, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useAuth } from '../../../../context/AuthContext';
 
 import { useSession } from '../../../../core/session/SessionContext';
 import { getParkById } from '../../../../core/config/parks';
@@ -34,6 +35,8 @@ const DetailsScreen = () => {
   const route = useRoute();
   const draftRepo = useDraftRepo();
   const { ranger, patrol } = useSession();
+  const { user } = useAuth();
+  const isCommunity = user?.role === 'community';
   const park = getParkById(ranger.parkId);
   const services = useIncidentServices();
 
@@ -63,13 +66,13 @@ const DetailsScreen = () => {
     setSaving(true);
 
     try {
-      const incident = await logIncident({
+      const incident = await logIncident({ reportType: isCommunity ? 'COMMUNITY' : 'PATROL',
         type:        draft.type,
         description,
         location:    draft.location,
         photoUri:    draft.photoUri ?? null,
-        rangerId:    ranger.id,
-        patrolId:    patrol.id,
+        rangerId: isCommunity ? user.id : ranger.id,
+        patrolId: isCommunity ? 'COMMUNITY-REPORT' : patrol.id,
         parkId:      ranger.parkId,
         park,
         incidentRepo:        services.incidentRepo,
@@ -98,7 +101,7 @@ const DetailsScreen = () => {
   const handleDiscard = useCallback(async () => {
     setShowCancelDialog(false);
     await discardDraft(draftRepo);
-    navigation.navigate('Home');
+    navigation.navigate(isCommunity ? 'CommunityHome' : 'IncidentList');
   }, [draftRepo, navigation]);
 
   return (
@@ -107,6 +110,7 @@ const DetailsScreen = () => {
         title="Incident Details"
         subtitle="Step 4 of 4"
         onBack={() => navigation.goBack()}
+        onClose={() => setShowCancelDialog(true)}
       />
       <OfflineBanner />
 
@@ -193,7 +197,14 @@ const DetailsScreen = () => {
         cancelLabel="Keep Draft"
         confirmColor={theme.colors.error}
         onConfirm={handleDiscard}
-        onCancel={() => setShowCancelDialog(false)}
+                onCancel={async () => {
+          setShowCancelDialog(false);
+          if (description) {
+            const updated = updateDraftStep(draft, DraftStep.DETAILS, { description });
+            await draftRepo.save(updated);
+          }
+          navigation.navigate(isCommunity ? 'CommunityHome' : 'IncidentList');
+        }}
       />
 
       <View style={styles.footer}>
@@ -251,3 +262,8 @@ const styles = StyleSheet.create({
 });
 
 export default DetailsScreen;
+
+
+
+
+

@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { collection, doc, setDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
+import { db } from '../core/config/firebase';
 
 const AuthContext = createContext();
 
@@ -31,68 +33,90 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    // Mock login logic
-    return new Promise((resolve, reject) => {
-      setTimeout(async () => {
-        if (email === 'officer@example.com' && password === 'Officer1!') {
-          const officerUser = { id: 'OFF-1', email, role: 'officer', fullName: 'Officer John' };
-          await AsyncStorage.setItem('@user', JSON.stringify(officerUser));
-          setUser(officerUser);
-          resolve(officerUser);
-        } 
-        // Park Manager account (for Camera Trap Review)
-        else if (email === 'manager@example.com' && password === 'Manager1!') {
-          const managerUser = { 
-            id: 'MGR-1', 
-            email, 
-            role: 'park_manager', 
-            fullName: 'Sarah Park Manager',
-            parkId: 'PARK-YALA'
-          };
-          await AsyncStorage.setItem('@user', JSON.stringify(managerUser));
-          setUser(managerUser);
-          resolve(managerUser);
+    try {
+      if (email === 'admin@example.com' && password === 'Admin1!') {
+        const adminUser = { id: 'ADM-1', email, role: 'admin', fullName: 'System Admin' };
+        await AsyncStorage.setItem('@user', JSON.stringify(adminUser));
+        setUser(adminUser);
+        return adminUser;
+      }
+
+      // Park Manager account (for Camera Trap Review)
+      if (email === 'manager@example.com' && password === 'Manager1!') {
+        const managerUser = {
+          id: 'MGR-1',
+          email,
+          role: 'park_manager',
+          fullName: 'Sarah Park Manager',
+          parkId: 'PARK-YALA'
+        };
+        await AsyncStorage.setItem('@user', JSON.stringify(managerUser));
+        setUser(managerUser);
+        return managerUser;
+      }
+
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', email), where('password', '==', password));
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        const foundUser = snapshot.docs[0].data();
+        if (foundUser.role === 'officer' && !foundUser.isVerified) {
+          throw new Error('Your Ranger Officer account is pending admin verification.');
         }
-        else if (email && password) {
-          const storedUsers = await AsyncStorage.getItem('@registered_users');
-          const users = storedUsers ? JSON.parse(storedUsers) : [];
-          const foundUser = users.find(u => u.email === email && u.password === password);
-          
-          if (foundUser) {
-            const memberUser = { ...foundUser, role: 'community' };
-            await AsyncStorage.setItem('@user', JSON.stringify(memberUser));
-            setUser(memberUser);
-            resolve(memberUser);
-          } else {
-            reject(new Error('Invalid email or password.'));
-          }
-        } else {
-          reject(new Error('Invalid email or password.'));
-        }
-      }, 1000);
-    });
+        await AsyncStorage.setItem('@user', JSON.stringify(foundUser));
+        setUser(foundUser);
+        return foundUser;
+      } else {
+        throw new Error('Invalid email or password.');
+      }
+    } catch (e) {
+      throw new Error(e.message || 'Network error logging in');
+    }
   };
 
   const register = async (userData) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(async () => {
-        try {
-          const storedUsers = await AsyncStorage.getItem('@registered_users');
-          const users = storedUsers ? JSON.parse(storedUsers) : [];
-          
-          if (users.find(u => u.email === userData.email)) {
-            reject(new Error('An account already exists with this email address.'));
-            return;
-          }
-          
-          users.push(userData);
-          await AsyncStorage.setItem('@registered_users', JSON.stringify(users));
-          resolve(userData);
-        } catch (e) {
-          reject(e);
-        }
-      }, 1000);
-    });
+    try {
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', userData.email));
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        throw new Error('An account already exists with this email address.');
+      }
+      
+      const newUser = { 
+        ...userData, 
+        id: `USR-${Date.now()}`,
+        isVerified: userData.role === 'officer' ? false : true 
+      };
+      
+      await setDoc(doc(db, 'users', newUser.id), newUser);
+      return newUser;
+    } catch (e) {
+      throw new Error(e.message || 'Network error registering');
+    }
+  };
+
+  const getPendingOfficers = async () => {
+    try {
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('role', '==', 'officer'), where('isVerified', '==', false));
+      // Add manual timeout check
+      const snapshot = await Promise.race([
+        getDocs(q),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('Timeout')), 10000))
+      ]);
+      return snapshot.docs.map(doc => doc.data());
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  };
+
+  const verifyOfficer = async (userId) => {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, { isVerified: true });
   };
 
   const logout = async () => {
@@ -106,10 +130,12 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem('@user', JSON.stringify(updatedUser));
       setUser(updatedUser);
       
-      const storedUsers = await AsyncStorage.getItem('@registered_users');
-      let users = storedUsers ? JSON.parse(storedUsers) : [];
-      users = users.map(u => u.email === updatedUser.email ? { ...u, ...updates } : u);
-      await AsyncStorage.setItem('@registered_users', JSON.stringify(users));
+      try {
+        const userRef = doc(db, 'users', user.id);
+        await updateDoc(userRef, updates);
+      } catch (e) {
+        console.error('Failed to sync profile update to cloud:', e);
+      }
     }
   };
 
@@ -133,7 +159,9 @@ export const AuthProvider = ({ children }) => {
       logout,
       updateProfile,
       completeOnboarding,
-      resetOnboarding
+      resetOnboarding,
+      getPendingOfficers,
+      verifyOfficer
     }}>
       {children}
     </AuthContext.Provider>

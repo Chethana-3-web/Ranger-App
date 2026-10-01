@@ -13,6 +13,9 @@ import CommunityDashboard from '../screens/community/CommunityDashboard';
 import OfficerDashboard from '../screens/officer/OfficerDashboard';
 import CameraTrapDashboard from '../screens/CameraTrapDashboard';
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import AdminDashboard from '../screens/admin/AdminDashboard';
+import CommunityNavigator from './CommunityNavigator';
+import MainNavigator from './MainNavigator';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,12 +41,14 @@ export default function RootNavigator() {
         </>
       ) : (
         <>
-          {user.role === 'officer' ? (
-            <Stack.Screen name="OfficerDashboard" component={OfficerDashboard} />
+          {user.role === 'admin' ? (
+            <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+          ) : user.role === 'officer' ? (
+            <Stack.Screen name="OfficerDashboard" component={MainNavigator} />
           ) : user.role === 'park_manager' || user.role === 'researcher' ? (
             <Stack.Screen name="CameraTrapDashboard" component={CameraTrapDashboard} />
           ) : (
-            <Stack.Screen name="CommunityDashboard" component={CommunityDashboard} />
+            <Stack.Screen name="CommunityDashboard" component={CommunityNavigator} />
           )}
           <Stack.Screen 
             name="Profile" 

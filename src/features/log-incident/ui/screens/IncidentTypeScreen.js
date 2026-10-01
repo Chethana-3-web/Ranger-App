@@ -7,9 +7,10 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 
 import { useSession } from '../../../../core/session/SessionContext';
@@ -23,7 +24,7 @@ import { ConfirmDialog } from '../../../../core/ui/ConfirmDialog';
 import theme from '../../../../core/ui/theme';
 import { useDraftRepo } from '../hooks/useDraftRepo';
 
-const TYPE_ICONS = {
+const TYPE_ICONS = { EMERGENCY: { icon: 'warning', color: '#D32F2F' },
   SNARE:    { icon: 'alert-circle', color: '#C62828' },
   CARCASS:  { icon: 'skull',        color: '#6D4C41' },
   TRACKS:   { icon: 'footsteps',    color: '#2E7D32' },
@@ -33,6 +34,8 @@ const TYPE_ICONS = {
 
 const IncidentTypeScreen = () => {
   const navigation = useNavigation();
+  const auth = useAuth();
+  const isCommunity = auth?.user?.role === 'community';
   const { ranger } = useSession();
   const park = getParkById(ranger.parkId);
   const types = getTypesForPark(park ?? { enabledIncidentTypes: [] });
@@ -51,10 +54,23 @@ const IncidentTypeScreen = () => {
     navigation.navigate('AddPhoto', { draft });
   }, [selectedType, draftRepo, navigation]);
 
+  const handleKeepDraft = async () => {
+    setShowCancelDialog(false);
+    if (selectedType) {
+      const draft = updateDraftStep(
+        createDraft(new Date().toISOString()),
+        DraftStep.TYPE,
+        { type: selectedType }
+      );
+      await draftRepo.save(draft);
+    }
+    navigation.navigate(isCommunity ? 'CommunityHome' : 'IncidentList');
+  };
+
   const handleDiscardDraft = useCallback(async () => {
     setShowCancelDialog(false);
     await draftRepo.delete();
-    navigation.navigate('Home');
+    navigation.navigate(isCommunity ? 'CommunityHome' : 'IncidentList');
   }, [draftRepo, navigation]);
 
   return (
@@ -62,7 +78,8 @@ const IncidentTypeScreen = () => {
       <AppHeader
         title="Log Incident"
         subtitle={`Step 1 of 4 · ${park?.name ?? ranger.parkId}`}
-        onBack={() => setShowCancelDialog(true)}
+        onBack={() => navigation.goBack()}
+        onClose={() => setShowCancelDialog(true)}
       />
       <OfflineBanner />
 
@@ -78,7 +95,12 @@ const IncidentTypeScreen = () => {
               <TouchableOpacity
                 key={key}
                 style={[styles.card, selected && styles.cardSelected]}
-                onPress={() => setSelectedType(key)}
+                onPress={() => {
+                  if (key === 'EMERGENCY') {
+                    Alert.alert('EMERGENCY', 'Please contact local authorities immediately at 119.', [{ text: 'OK' }]);
+                  }
+                  setSelectedType(key);
+                }}
                 activeOpacity={0.8}
                 accessibilityRole="radio"
                 accessibilityState={{ selected }}
@@ -113,7 +135,7 @@ const IncidentTypeScreen = () => {
         cancelLabel="Keep Draft"
         confirmColor={theme.colors.error}
         onConfirm={handleDiscardDraft}
-        onCancel={() => setShowCancelDialog(false)}
+        onCancel={handleKeepDraft}
       />
     </SafeAreaView>
   );
@@ -152,3 +174,7 @@ const styles = StyleSheet.create({
 });
 
 export default IncidentTypeScreen;
+
+
+
+

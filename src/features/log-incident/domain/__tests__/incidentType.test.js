@@ -84,3 +84,20 @@ describe('isValidIncidentType', () => {
     expect(isValidIncidentType('')).toBe(false);
   });
 });
+
+// ── syncStatus coverage ───────────────────────────────────────────────────────
+import { SyncStatus, isValidSyncStatus } from '../syncStatus';
+
+describe('isValidSyncStatus', () => {
+  test('isValidSyncStatus_withPendingSync_returnsTrue', () => {
+    expect(isValidSyncStatus(SyncStatus.PENDING_SYNC)).toBe(true);
+  });
+
+  test('isValidSyncStatus_withSynced_returnsTrue', () => {
+    expect(isValidSyncStatus(SyncStatus.SYNCED)).toBe(true);
+  });
+
+  test('isValidSyncStatus_withUnknown_returnsFalse', () => {
+    expect(isValidSyncStatus('UNKNOWN')).toBe(false);
+  });
+});

@@ -1,15 +1,16 @@
 /**
  * Log Incident – Location Capture Screen
  *
- * Automatically tries to obtain GPS. If unavailable (A1) prompts the ranger
- * to mark the location manually. Not a step the ranger interacts with long —
- * it resolves automatically and advances to Details.
+ * Automatically tries to obtain GPS once on mount.
+ * If unavailable (A1), prompts the ranger to mark manually.
+ * The empty dependency array [] ensures the effect runs exactly once.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../../../context/AuthContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 import { GpsLocationProvider } from '../../infrastructure/gpsLocationProvider';
@@ -20,37 +21,47 @@ import { ConfirmDialog } from '../../../../core/ui/ConfirmDialog';
 import theme from '../../../../core/ui/theme';
 import { useDraftRepo } from '../hooks/useDraftRepo';
 
-const gpsProvider = GpsLocationProvider();
-
 const LocationCaptureScreen = () => {
   const navigation = useNavigation();
+  const auth = useAuth();
+  const isCommunity = auth?.user?.role === 'community';
   const route = useRoute();
   const draftRepo = useDraftRepo();
 
-  const { draft } = route.params ?? {};
-  const [status, setStatus] = useState('acquiring'); // 'acquiring' | 'success' | 'unavailable'
-  const [location, setLocation] = useState(null);
-  const [showManualDialog, setShowManualDialog] = useState(false);
+  // Capture draft and navigation refs once — never re-read from route inside effect
+  const draftRef   = useRef(route.params?.draft ?? null);
+  const navRef     = useRef(navigation);
+  const repoRef    = useRef(draftRepo);
 
+  const [status, setStatus]               = useState('acquiring');
+  const [location, setLocation]           = useState(null);
+  const [showManualDialog, setShowManualDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+  // Run GPS acquisition exactly once on mount
   useEffect(() => {
     let cancelled = false;
+    const provider = GpsLocationProvider();
 
     async function acquire() {
-      setStatus('acquiring');
-      const loc = await gpsProvider.getCurrentLocation();
-
+      const loc = await provider.getCurrentLocation();
       if (cancelled) return;
 
       if (loc) {
         setLocation(loc);
         setStatus('success');
 
-        // Auto-advance after a brief confirmation
+        // Autosave draft with location, then navigate
+        const draft   = draftRef.current;
         const updated = updateDraftStep(draft, DraftStep.LOCATION, { location: loc });
-        await draftRepo.save(updated);
-        setTimeout(() => {
-          if (!cancelled) navigation.navigate('Details', { draft: updated });
+        await repoRef.current.save(updated);
+
+        // Brief pause so the success state is visible
+        const timer = setTimeout(() => {
+          if (!cancelled) navRef.current.navigate('Details', { draft: updated });
         }, 800);
+
+        return () => clearTimeout(timer);
       } else {
         setStatus('unavailable');
         setShowManualDialog(true);
@@ -59,13 +70,21 @@ const LocationCaptureScreen = () => {
 
     acquire();
     return () => { cancelled = true; };
-  }); // runs once on mount — deps intentionally omitted (draft is stable route param)
+  }, []); // intentionally empty — runs once on mount
+
+  const draft = draftRef.current;
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <AppHeader title="Capturing Location" subtitle="Step 3 of 4" />
+      <AppHeader 
+        title="Capturing Location" 
+        subtitle="Step 3 of 4" 
+        onBack={() => navigation.goBack()}
+        onClose={() => setShowCancelDialog(true)}
+      />
 
       <View style={styles.body}>
+
         {status === 'acquiring' && (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -83,7 +102,9 @@ const LocationCaptureScreen = () => {
             <Text style={styles.coords}>
               {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
             </Text>
-            <Text style={styles.statusSub}>Accuracy: ±{location.accuracyMeters?.toFixed(0) ?? '?'} m</Text>
+            <Text style={styles.statusSub}>
+              Accuracy: ±{location.accuracyMeters?.toFixed(0) ?? '?'} m
+            </Text>
           </View>
         )}
 
@@ -95,13 +116,16 @@ const LocationCaptureScreen = () => {
             </Text>
             <PrimaryButton
               label="Mark Location Manually"
-              onPress={() => navigation.navigate('ManualLocation', { draft, parkId: draft?.parkId })}
+              onPress={() => navigation.navigate('ManualLocation', {
+                draft, parkId: draft?.parkId,
+              })}
             />
           </View>
         )}
+
       </View>
 
-      {/* A1 dialog */}
+      {/* A1 – GPS unavailable dialog */}
       <ConfirmDialog
         visible={showManualDialog}
         title="GPS Unavailable"
@@ -122,12 +146,19 @@ const LocationCaptureScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  safe:    { flex: 1, backgroundColor: theme.colors.background },
-  body:    { flex: 1, justifyContent: 'center', padding: theme.spacing.lg },
-  center:  { alignItems: 'center', gap: theme.spacing.md },
+  safe:       { flex: 1, backgroundColor: theme.colors.background },
+  body:       { flex: 1, justifyContent: 'center', padding: theme.spacing.lg },
+  center:     { alignItems: 'center', gap: theme.spacing.md },
   statusText: { fontSize: 20, fontWeight: '700', color: theme.colors.text, textAlign: 'center' },
   statusSub:  { fontSize: 13, color: theme.colors.textSecondary, textAlign: 'center' },
   coords:     { fontSize: 16, color: theme.colors.primary, fontWeight: '600' },
 });
 
 export default LocationCaptureScreen;
+
+
+
+
+
+
+

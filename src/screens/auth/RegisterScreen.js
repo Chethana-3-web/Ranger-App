@@ -6,6 +6,7 @@ import { PrimaryButton } from '../../core/ui/PrimaryButton';
 import theme from '../../core/ui/theme';
 import { useAuth } from '../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 const DISTRICTS = [
   'Ampara', 'Anuradhapura', 'Badulla', 'Batticaloa', 'Colombo', 'Galle', 'Gampaha', 
@@ -40,6 +41,25 @@ export default function RegisterScreen({ navigation }) {
   const hasSpecialChar = /[@$!%*?&]/.test(password);
   const isPasswordValid = hasMinLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
 
+  const [role, setRole] = useState('community'); // 'community' or 'officer'
+  const [idPhotoUri, setIdPhotoUri] = useState(null);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 0.8,
+      base64: true, // Request base64 string
+    });
+
+    if (!result.canceled) {
+      // Use base64 string so it can be saved to Firestore and viewed on the Web
+      const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      setIdPhotoUri(base64Image);
+      setErrors(e => ({...e, idPhoto: null}));
+    }
+  };
+
   const validate = () => {
     let valid = true;
     let newErrors = {};
@@ -49,6 +69,11 @@ export default function RegisterScreen({ navigation }) {
     if (!phone || phone.length < 10) { newErrors.phone = 'Valid phone number is required.'; valid = false; }
     if (!district) { newErrors.district = 'District selection is required.'; valid = false; }
     if (!address.trim()) { newErrors.address = 'Address is required.'; valid = false; }
+    
+    if (role === 'officer' && !idPhotoUri) {
+      newErrors.idPhoto = 'Ranger ID Photo is required.';
+      valid = false;
+    }
 
     if (!isPasswordValid) {
       newErrors.password = 'Password does not meet the requirements.';
@@ -66,12 +91,20 @@ export default function RegisterScreen({ navigation }) {
     
     setLocalLoading(true);
     try {
-      await register({ fullName, email, phone, district, address, password });
-      Alert.alert(
-        "Welcome to the Community!",
-        "Your account has been created. You can now log in to report wildlife incidents.",
-        [{ text: "Continue to Login", onPress: () => navigation.navigate('Login') }]
-      );
+      await register({ fullName, email, phone, district, address, password, role, idPhotoUri });
+      if (role === 'officer') {
+        Alert.alert(
+          "Registration Submitted",
+          "Your Ranger Officer account is pending verification by the admin. You will be able to log in once verified.",
+          [{ text: "OK", onPress: () => navigation.navigate('Login') }]
+        );
+      } else {
+        Alert.alert(
+          "Welcome to the Community!",
+          "Your account has been created. You can now log in to report wildlife incidents.",
+          [{ text: "Continue to Login", onPress: () => navigation.navigate('Login') }]
+        );
+      }
     } catch (error) {
       setErrors(prev => ({ ...prev, submit: error.message || 'Registration failed.' }));
     } finally {
@@ -137,6 +170,43 @@ export default function RegisterScreen({ navigation }) {
               error={errors.email}
             />
             <View style={styles.spacer} />
+
+            <Text style={styles.label}>Account Role *</Text>
+            <View style={{ flexDirection: 'row', marginBottom: 16 }}>
+              <TouchableOpacity
+                style={[styles.roleButton, role === 'community' && styles.roleButtonActive]}
+                onPress={() => setRole('community')}
+              >
+                <Ionicons name="people" size={20} color={role === 'community' ? theme.colors.surface : theme.colors.primary} />
+                <Text style={[styles.roleButtonText, role === 'community' && styles.roleButtonTextActive]}>Villager</Text>
+              </TouchableOpacity>
+              <View style={{ width: 10 }} />
+              <TouchableOpacity
+                style={[styles.roleButton, role === 'officer' && styles.roleButtonActive]}
+                onPress={() => setRole('officer')}
+              >
+                <Ionicons name="shield-checkmark" size={20} color={role === 'officer' ? theme.colors.surface : theme.colors.primary} />
+                <Text style={[styles.roleButtonText, role === 'officer' && styles.roleButtonTextActive]}>Ranger</Text>
+              </TouchableOpacity>
+            </View>
+
+            {role === 'officer' && (
+              <View style={{ marginBottom: 16 }}>
+                <Text style={styles.label}>Ranger ID Upload *</Text>
+                <TouchableOpacity style={[styles.imageUploadBtn, errors.idPhoto && styles.inputError]} onPress={pickImage}>
+                  {idPhotoUri ? (
+                    <Image source={{ uri: idPhotoUri }} style={styles.uploadedImage} />
+                  ) : (
+                    <>
+                      <Ionicons name="camera-outline" size={24} color={theme.colors.textSecondary} />
+                      <Text style={styles.imageUploadText}>Tap to upload ID</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+                {errors.idPhoto ? <Text style={styles.errorText}>{errors.idPhoto}</Text> : null}
+                <View style={styles.spacer} />
+              </View>
+            )}
 
             <TextField
               label="Phone Number *"
@@ -422,5 +492,47 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     color: theme.colors.text,
+  },
+  roleButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.surface,
+  },
+  roleButtonActive: {
+    backgroundColor: theme.colors.primary,
+  },
+  roleButtonText: {
+    marginLeft: 8,
+    fontWeight: '600',
+    color: theme.colors.primary,
+  },
+  roleButtonTextActive: {
+    color: theme.colors.surface,
+  },
+  imageUploadBtn: {
+    height: 100,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F9F9F9',
+  },
+  uploadedImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: theme.borderRadius.md,
+  },
+  imageUploadText: {
+    marginTop: 8,
+    color: theme.colors.textSecondary,
+    fontSize: 14,
   }
 });

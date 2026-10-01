@@ -10,6 +10,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../../../context/AuthContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 import { updateDraftStep, DraftStep } from '../../domain/draft';
@@ -25,6 +26,8 @@ const cameraProvider = ExpoCameraProvider();
 
 const AddPhotoScreen = () => {
   const navigation = useNavigation();
+  const auth = useAuth();
+  const isCommunity = auth?.user?.role === 'community';
   const route = useRoute();
   const draftRepo = useDraftRepo();
 
@@ -55,7 +58,7 @@ const AddPhotoScreen = () => {
   const handleDiscard = useCallback(async () => {
     setShowCancelDialog(false);
     await draftRepo.delete();
-    navigation.navigate('Home');
+    navigation.navigate(isCommunity ? 'CommunityHome' : 'IncidentList');
   }, [draftRepo, navigation]);
 
   return (
@@ -63,7 +66,8 @@ const AddPhotoScreen = () => {
       <AppHeader
         title="Add Photo"
         subtitle="Step 2 of 4 · Optional"
-        onBack={handleCancel}
+        onBack={() => navigation.goBack()}
+        onClose={() => setShowCancelDialog(true)}
       />
 
       <View style={styles.body}>
@@ -85,6 +89,12 @@ const AddPhotoScreen = () => {
           </View>
         )}
 
+        {/* GPS status chip – shows ranger that GPS will be captured next */}
+        <View style={styles.gpsChip}>
+          <Ionicons name="location-outline" size={14} color={theme.colors.primary} />
+          <Text style={styles.gpsChipText}>GPS location will be captured automatically next</Text>
+        </View>
+
         <View style={styles.actions}>
           <PrimaryButton
             label={photoUri ? '📷 Retake Photo' : '📷 Take Photo'}
@@ -97,7 +107,7 @@ const AddPhotoScreen = () => {
             />
           )}
           <SecondaryButton
-            label="Skip Photo →"
+            label="Skip Photo"
             onPress={() => handleContinue(null)}
           />
         </View>
@@ -111,7 +121,14 @@ const AddPhotoScreen = () => {
         cancelLabel="Keep Draft"
         confirmColor={theme.colors.error}
         onConfirm={handleDiscard}
-        onCancel={() => setShowCancelDialog(false)}
+                onCancel={async () => {
+          setShowCancelDialog(false);
+          if (photoUri) {
+            const updated = updateDraftStep(draft, DraftStep.PHOTO, { photoUri });
+            await draftRepo.save(updated);
+          }
+          navigation.navigate(isCommunity ? 'CommunityHome' : 'IncidentList');
+        }}
       />
     </SafeAreaView>
   );
@@ -137,7 +154,21 @@ const styles = StyleSheet.create({
     padding: theme.spacing.sm,
   },
   errorText: { color: theme.colors.error, fontSize: 13, flex: 1 },
+  gpsChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: theme.colors.primary + '14',
+    borderRadius: theme.borderRadius.full,
+    paddingHorizontal: 12, paddingVertical: 6,
+    alignSelf: 'flex-start',
+  },
+  gpsChipText: { color: theme.colors.primary, fontSize: 12, fontWeight: '600' },
   actions: { gap: theme.spacing.sm },
 });
 
 export default AddPhotoScreen;
+
+
+
+
+
+
