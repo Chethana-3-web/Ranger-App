@@ -85,6 +85,12 @@ const AddPhotoScreen = () => {
           </View>
         )}
 
+        {/* GPS status chip – shows ranger that GPS will be captured next */}
+        <View style={styles.gpsChip}>
+          <Ionicons name="location-outline" size={14} color={theme.colors.primary} />
+          <Text style={styles.gpsChipText}>GPS location will be captured automatically next</Text>
+        </View>
+
         <View style={styles.actions}>
           <PrimaryButton
             label={photoUri ? '📷 Retake Photo' : '📷 Take Photo'}
@@ -97,7 +103,7 @@ const AddPhotoScreen = () => {
             />
           )}
           <SecondaryButton
-            label="Skip Photo →"
+            label="Skip Photo"
             onPress={() => handleContinue(null)}
           />
         </View>
@@ -137,6 +143,14 @@ const styles = StyleSheet.create({
     padding: theme.spacing.sm,
   },
   errorText: { color: theme.colors.error, fontSize: 13, flex: 1 },
+  gpsChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: theme.colors.primary + '14',
+    borderRadius: theme.borderRadius.full,
+    paddingHorizontal: 12, paddingVertical: 6,
+    alignSelf: 'flex-start',
+  },
+  gpsChipText: { color: theme.colors.primary, fontSize: 12, fontWeight: '600' },
   actions: { gap: theme.spacing.sm },
 });
 

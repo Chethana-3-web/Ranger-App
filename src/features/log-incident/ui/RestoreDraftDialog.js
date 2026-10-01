@@ -56,7 +56,7 @@ const RestoreDraftDialog = () => {
     <ConfirmDialog
       visible={visible}
       title="Unsaved Incident"
-      message="You have an unsaved incident. Do you want to restore it or start fresh?"
+      message="You have an unsaved incident. Do you want to restore it?"
       confirmLabel="Restore"
       cancelLabel="Discard"
       confirmColor={theme.colors.primary}
