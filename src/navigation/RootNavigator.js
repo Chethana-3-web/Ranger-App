@@ -11,6 +11,7 @@ import RegisterScreen from '../screens/auth/RegisterScreen';
 
 import CommunityDashboard from '../screens/community/CommunityDashboard';
 import OfficerDashboard from '../screens/officer/OfficerDashboard';
+import CameraTrapDashboard from '../screens/CameraTrapDashboard';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 
 const Stack = createNativeStackNavigator();
@@ -39,6 +40,8 @@ export default function RootNavigator() {
         <>
           {user.role === 'officer' ? (
             <Stack.Screen name="OfficerDashboard" component={OfficerDashboard} />
+          ) : user.role === 'park_manager' || user.role === 'researcher' ? (
+            <Stack.Screen name="CameraTrapDashboard" component={CameraTrapDashboard} />
           ) : (
             <Stack.Screen name="CommunityDashboard" component={CommunityDashboard} />
           )}

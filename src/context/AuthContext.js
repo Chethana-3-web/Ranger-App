@@ -39,7 +39,21 @@ export const AuthProvider = ({ children }) => {
           await AsyncStorage.setItem('@user', JSON.stringify(officerUser));
           setUser(officerUser);
           resolve(officerUser);
-        } else if (email && password) {
+        } 
+        // Park Manager account (for Camera Trap Review)
+        else if (email === 'manager@example.com' && password === 'Manager1!') {
+          const managerUser = { 
+            id: 'MGR-1', 
+            email, 
+            role: 'park_manager', 
+            fullName: 'Sarah Park Manager',
+            parkId: 'PARK-YALA'
+          };
+          await AsyncStorage.setItem('@user', JSON.stringify(managerUser));
+          setUser(managerUser);
+          resolve(managerUser);
+        }
+        else if (email && password) {
           const storedUsers = await AsyncStorage.getItem('@registered_users');
           const users = storedUsers ? JSON.parse(storedUsers) : [];
           const foundUser = users.find(u => u.email === email && u.password === password);
