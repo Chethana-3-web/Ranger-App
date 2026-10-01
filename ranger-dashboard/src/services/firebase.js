@@ -14,12 +14,13 @@ import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey:            'AIzaSyBiD5QOG8QUJPeVxFnByPhmxsvGiltAGGQ',
-  authDomain:        'ranger-app-b7637.firebaseapp.com',
-  projectId:         'ranger-app-b7637',
-  storageBucket:     'ranger-app-b7637.firebasestorage.app',
-  messagingSenderId: '654015693659',
-  appId:             '1:654015693659:web:8fe087ba8fb92b621a907e',
+  apiKey: "AIzaSyAqIqZaZDIafRo064Nb24lhbDU4EffqPWM",
+  authDomain: "ranger-abaec.firebaseapp.com",
+  projectId: "ranger-abaec",
+  storageBucket: "ranger-abaec.firebasestorage.app",
+  messagingSenderId: "857666252220",
+  appId: "1:857666252220:web:3899ce46f130cfac608fb9",
+  measurementId: "G-7CJH298BHJ"
 };
 
 // Guard against double-initialisation (e.g. HMR during development)
