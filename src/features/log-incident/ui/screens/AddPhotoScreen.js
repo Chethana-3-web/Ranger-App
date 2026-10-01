@@ -117,7 +117,7 @@ const AddPhotoScreen = () => {
         cancelLabel="Keep Draft"
         confirmColor={theme.colors.error}
         onConfirm={handleDiscard}
-        onCancel={() => setShowCancelDialog(false)}
+        onCancel={() => { setShowCancelDialog(false); navigation.navigate('Home'); }}
       />
     </SafeAreaView>
   );
@@ -155,3 +155,4 @@ const styles = StyleSheet.create({
 });
 
 export default AddPhotoScreen;
+

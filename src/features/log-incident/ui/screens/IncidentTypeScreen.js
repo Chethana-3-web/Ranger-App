@@ -51,6 +51,19 @@ const IncidentTypeScreen = () => {
     navigation.navigate('AddPhoto', { draft });
   }, [selectedType, draftRepo, navigation]);
 
+  const handleKeepDraft = async () => {
+    setShowCancelDialog(false);
+    if (selectedType) {
+      const draft = updateDraftStep(
+        createDraft(new Date().toISOString()),
+        DraftStep.TYPE,
+        { type: selectedType }
+      );
+      await draftRepo.save(draft);
+    }
+    navigation.navigate('Home');
+  };
+
   const handleDiscardDraft = useCallback(async () => {
     setShowCancelDialog(false);
     await draftRepo.delete();
@@ -118,7 +131,7 @@ const IncidentTypeScreen = () => {
         cancelLabel="Keep Draft"
         confirmColor={theme.colors.error}
         onConfirm={handleDiscardDraft}
-        onCancel={() => setShowCancelDialog(false)}
+        onCancel={handleKeepDraft}
       />
     </SafeAreaView>
   );
@@ -157,3 +170,4 @@ const styles = StyleSheet.create({
 });
 
 export default IncidentTypeScreen;
+
