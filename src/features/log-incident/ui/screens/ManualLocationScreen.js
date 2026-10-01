@@ -12,6 +12,7 @@ import {
   View, Text, StyleSheet, TextInput, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../../../../context/AuthContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -20,11 +21,14 @@ import { ManualLocationProvider } from '../../infrastructure/manualLocationProvi
 import { updateDraftStep, DraftStep } from '../../domain/draft';
 import AppHeader from '../../../../core/ui/AppHeader';
 import { PrimaryButton } from '../../../../core/ui/PrimaryButton';
+import { ConfirmDialog } from '../../../../core/ui/ConfirmDialog';
 import theme from '../../../../core/ui/theme';
 import { useDraftRepo } from '../hooks/useDraftRepo';
 
 const ManualLocationScreen = () => {
   const navigation = useNavigation();
+  const auth = useAuth();
+  const isCommunity = auth?.user?.role === 'community';
   const route = useRoute();
   const draftRepo = useDraftRepo();
 
@@ -36,6 +40,7 @@ const ManualLocationScreen = () => {
   const [lng, setLng] = useState(String(centre.lng));
   const [latError, setLatError] = useState(null);
   const [lngError, setLngError] = useState(null);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const validate = () => {
     const latNum = parseFloat(lat);
@@ -164,4 +169,9 @@ const styles = StyleSheet.create({
 });
 
 export default ManualLocationScreen;
+
+
+
+
+
 

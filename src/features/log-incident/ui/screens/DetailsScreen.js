@@ -101,7 +101,7 @@ const DetailsScreen = () => {
   const handleDiscard = useCallback(async () => {
     setShowCancelDialog(false);
     await discardDraft(draftRepo);
-    navigation.navigate('Home');
+    navigation.navigate(isCommunity ? 'CommunityHome' : 'IncidentList');
   }, [draftRepo, navigation]);
 
   return (
@@ -109,7 +109,8 @@ const DetailsScreen = () => {
       <AppHeader
         title="Incident Details"
         subtitle="Step 4 of 4"
-        onBack={() => setShowCancelDialog(true)}
+        onBack={() => navigation.goBack()}
+        onClose={() => setShowCancelDialog(true)}
       />
       <OfflineBanner />
 
@@ -196,7 +197,14 @@ const DetailsScreen = () => {
         cancelLabel="Keep Draft"
         confirmColor={theme.colors.error}
         onConfirm={handleDiscard}
-        onCancel={() => { setShowCancelDialog(false); navigation.navigate('Home'); }}
+                onCancel={async () => {
+          setShowCancelDialog(false);
+          if (description) {
+            const updated = updateDraftStep(draft, DraftStep.DETAILS, { description });
+            await draftRepo.save(updated);
+          }
+          navigation.navigate(isCommunity ? 'CommunityHome' : 'IncidentList');
+        }}
       />
 
       <View style={styles.footer}>
@@ -254,4 +262,8 @@ const styles = StyleSheet.create({
 });
 
 export default DetailsScreen;
+
+
+
+
 

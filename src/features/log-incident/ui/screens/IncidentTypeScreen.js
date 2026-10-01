@@ -10,6 +10,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 
 import { useSession } from '../../../../core/session/SessionContext';
@@ -33,6 +34,8 @@ const TYPE_ICONS = { EMERGENCY: { icon: 'warning', color: '#D32F2F' },
 
 const IncidentTypeScreen = () => {
   const navigation = useNavigation();
+  const auth = useAuth();
+  const isCommunity = auth?.user?.role === 'community';
   const { ranger } = useSession();
   const park = getParkById(ranger.parkId);
   const types = getTypesForPark(park ?? { enabledIncidentTypes: [] });
@@ -61,13 +64,13 @@ const IncidentTypeScreen = () => {
       );
       await draftRepo.save(draft);
     }
-    navigation.navigate('Home');
+    navigation.navigate(isCommunity ? 'CommunityHome' : 'IncidentList');
   };
 
   const handleDiscardDraft = useCallback(async () => {
     setShowCancelDialog(false);
     await draftRepo.delete();
-    navigation.navigate('Home');
+    navigation.navigate(isCommunity ? 'CommunityHome' : 'IncidentList');
   }, [draftRepo, navigation]);
 
   return (
@@ -75,7 +78,8 @@ const IncidentTypeScreen = () => {
       <AppHeader
         title="Log Incident"
         subtitle={`Step 1 of 4 · ${park?.name ?? ranger.parkId}`}
-        onBack={() => setShowCancelDialog(true)}
+        onBack={() => navigation.goBack()}
+        onClose={() => setShowCancelDialog(true)}
       />
       <OfflineBanner />
 
@@ -170,4 +174,7 @@ const styles = StyleSheet.create({
 });
 
 export default IncidentTypeScreen;
+
+
+
 
