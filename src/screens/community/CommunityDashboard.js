@@ -6,13 +6,14 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+
 import { useAuth } from '../../context/AuthContext';
-import theme from '../../core/ui/theme';
-import OfflineBanner from '../../core/ui/OfflineBanner';
+import COLORS from '../../core/constants/colors';
 
 const CommunityDashboard = () => {
   const navigation = useNavigation();
@@ -22,43 +23,53 @@ const CommunityDashboard = () => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+    // Simulate refresh
+    setTimeout(() => setRefreshing(false), 800);
   }, []);
+
+  const handleLogout = () => {
+    Alert.alert('Logout', 'Are you sure you want to log out?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Logout', style: 'destructive', onPress: logout },
+    ]);
+  };
 
   const QUICK_ACTIONS = [
     {
       id:          'report',
       label:       'Submit Community Report',
-      icon:        'add-circle',
-      description: 'Report wildlife sightings or suspicious activities',
-      color:       theme.colors.error,
+      icon:        'megaphone-outline',
+      description: 'Report wildlife sighting or incident',
+      color:       COLORS.ERROR,
       onPress:     () => navigation.navigate('SubmitReport'),
     },
     {
-      id:          'my-reports',
+      id:          'list',
       label:       'My Reports',
       icon:        'list',
-      description: 'View the status of your submitted reports',
-      color:       theme.colors.primary,
+      description: 'View your submitted reports',
+      color:       COLORS.PRIMARY,
       onPress:     () => navigation.navigate('MyReports'),
     },
     {
       id:          'profile',
       label:       'My Profile',
-      icon:        'person',
-      description: 'Manage your community profile',
-      color:       theme.colors.info,
+      icon:        'person-outline',
+      description: 'Update your personal details',
+      color:       COLORS.ACCENT,
       onPress:     () => navigation.navigate('Profile'),
     },
     {
       id:          'logout',
       label:       'Logout',
-      icon:        'log-out',
+      icon:        'log-out-outline',
       description: 'Sign out of your account',
-      color:       theme.colors.textSecondary,
-      onPress:     logout,
+      color:       COLORS.TEXT_SECONDARY,
+      onPress:     handleLogout,
     },
   ];
+
+  const userName = user?.fullName || user?.name || 'Community Member';
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
@@ -67,15 +78,13 @@ const CommunityDashboard = () => {
         <View>
           <Text style={styles.headerTitle}>Community Portal</Text>
           <Text style={styles.headerSub}>
-            Welcome, {user?.fullName || user?.name || 'Community Member'}
+            {userName}
           </Text>
         </View>
         <View style={styles.headerBadge}>
-          <Ionicons name="people" size={28} color="#fff" />
+          <Ionicons name="leaf" size={28} color="#fff" />
         </View>
       </View>
-
-      <OfflineBanner />
 
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -83,11 +92,18 @@ const CommunityDashboard = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[theme.colors.primary]}
-            tintColor={theme.colors.primary}
+            colors={[COLORS.PRIMARY]}
+            tintColor={COLORS.PRIMARY}
           />
         }
       >
+        {/* Info card */}
+        <View style={styles.infoCard}>
+          <Text style={styles.infoTitle}>Welcome!</Text>
+          <Text style={styles.infoSubtitle}>Help protect wildlife and your community.</Text>
+        </View>
+
+        {/* Quick action tiles */}
         <Text style={styles.sectionLabel}>Quick Actions</Text>
         <View style={styles.tilesGrid}>
           {QUICK_ACTIONS.map((action) => (
@@ -113,9 +129,9 @@ const CommunityDashboard = () => {
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.colors.background },
+  safe: { flex: 1, backgroundColor: COLORS.BACKGROUND },
   header: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: COLORS.HEADER_BG,
     paddingHorizontal: 20,
     paddingTop: 48,
     paddingBottom: 20,
@@ -131,13 +147,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
   scroll: { padding: 16 },
+  infoCard: {
+    backgroundColor: COLORS.SURFACE, borderRadius: 14, padding: 16, marginBottom: 20,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+  },
+  infoTitle: { fontSize: 16, fontWeight: '700', color: COLORS.TEXT_PRIMARY, marginBottom: 4 },
+  infoSubtitle: { fontSize: 13, color: COLORS.TEXT_SECONDARY },
   sectionLabel: {
-    fontSize: 14, fontWeight: '700', color: theme.colors.text,
+    fontSize: 14, fontWeight: '700', color: COLORS.TEXT_PRIMARY,
     marginBottom: 12, marginLeft: 4,
   },
   tilesGrid: { gap: 12 },
   tile: {
-    backgroundColor: theme.colors.surface, borderRadius: 12, padding: 16,
+    backgroundColor: COLORS.SURFACE, borderRadius: 12, padding: 16,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
   },
@@ -145,8 +168,8 @@ const styles = StyleSheet.create({
     width: 52, height: 52, borderRadius: 26,
     justifyContent: 'center', alignItems: 'center', marginBottom: 10,
   },
-  tileLabel: { fontSize: 16, fontWeight: '700', color: theme.colors.text, marginBottom: 4 },
-  tileDesc:  { fontSize: 13, color: theme.colors.textSecondary },
+  tileLabel: { fontSize: 16, fontWeight: '700', color: COLORS.TEXT_PRIMARY, marginBottom: 4 },
+  tileDesc:  { fontSize: 13, color: COLORS.TEXT_SECONDARY },
 });
 
 export default CommunityDashboard;
