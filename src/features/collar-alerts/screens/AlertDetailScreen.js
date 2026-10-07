@@ -7,7 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, ActivityIndicator,
+  StyleSheet, ActivityIndicator, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -45,8 +45,8 @@ export default function AlertDetailScreen() {
   const { ranger }       = useSession();
 
   // Live alert state from Firestore — params.alert is the fallback (offline)
-  const [alert, setAlert]             = useState(params.alert);
-  const [loading, setLoading]         = useState(true);
+  const [alert, setAlert]                 = useState(params.alert);
+  const [loading, setLoading]             = useState(true);
   const [acknowledging, setAcknowledging] = useState(false);
 
   // Subscribe to live Firestore doc — reflects any DB changes immediately
@@ -102,6 +102,20 @@ export default function AlertDetailScreen() {
       <OfflineBanner />
 
       <ScrollView contentContainerStyle={styles.scroll}>
+
+        {/* Hero animal image — set by admin via web dashboard */}
+        {alert.animalName ? (
+          <View style={styles.heroContainer}>
+            {alert.animalImageUrl ? (
+              <Image source={{ uri: alert.animalImageUrl }} style={styles.heroImage} resizeMode="cover" />
+            ) : (
+              <View style={styles.heroPlaceholder}>
+                <Ionicons name="paw-outline" size={48} color={COLORS.BORDER} />
+                <Text style={styles.heroPlaceholderText}>{alert.animalName}</Text>
+              </View>
+            )}
+          </View>
+        ) : null}
 
         {/* Risk level banner */}
         <View style={[styles.riskBanner, { backgroundColor: riskColor }]}>
@@ -177,6 +191,11 @@ const styles = StyleSheet.create({
   safe:   { flex: 1, backgroundColor: COLORS.BACKGROUND },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   scroll: { padding: 16, paddingBottom: 40 },
+
+  heroContainer:       { position: 'relative', marginBottom: 14, borderRadius: 12, overflow: 'hidden' },
+  heroImage:           { width: '100%', height: 200 },
+  heroPlaceholder:     { width: '100%', height: 160, backgroundColor: COLORS.BACKGROUND, justifyContent: 'center', alignItems: 'center', gap: 8, borderRadius: 12, borderWidth: 1, borderColor: COLORS.BORDER },
+  heroPlaceholderText: { fontSize: 13, color: COLORS.TEXT_SECONDARY, fontWeight: '600' },
 
   riskBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 8,

@@ -10,7 +10,7 @@
 
 import {
   collection, onSnapshot, query, orderBy, where,
-  doc, updateDoc, addDoc, serverTimestamp,
+  doc, updateDoc, addDoc, serverTimestamp, deleteDoc,
 } from 'firebase/firestore';
 import { db } from '../../../core/config/firebase';
 import { MOCK_ALERTS } from '../data/mockAlerts';
@@ -202,4 +202,16 @@ export async function updateAlertResponse({ responseId, alertId, outcome, notes,
     status:    statusMap[outcome] ?? 'Resolved',
     updatedAt: serverTimestamp(),
   });
+}
+
+// ── Delete a response ─────────────────────────────────────────────────────────
+
+/**
+ * Permanently delete a collar_response document.
+ *
+ * @param {string} responseId
+ * @returns {Promise<void>}
+ */
+export async function deleteAlertResponse(responseId) {
+  await deleteDoc(doc(db, 'collar_responses', responseId));
 }

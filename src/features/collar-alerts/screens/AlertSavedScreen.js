@@ -18,9 +18,9 @@ import { submitAlertResponse } from '../services/alertService';
 import COLORS from '../../../core/constants/colors';
 import theme from '../../../core/ui/theme';
 const OUTCOME_CONFIG = {
-  Resolved:   { label: 'Resolved',          color: '#2E7D32', icon: 'checkmark-circle',  bg: '#E8F5E9' },
-  Monitoring: { label: 'Active / Monitoring',color: '#F57F17', icon: 'eye-circle-outline', bg: '#FFF8E1' },
-  Reassigned: { label: 'Active / Reassigned',color: '#1565C0', icon: 'people-circle-outline', bg: '#E3F2FD' },
+  Resolved:   { label: 'Resolved',           color: '#2E7D32', icon: 'checkmark-circle', bg: '#E8F5E9' },
+  Monitoring: { label: 'Active / Monitoring', color: '#F57F17', icon: 'eye-outline',      bg: '#FFF8E1' },
+  Reassigned: { label: 'Active / Reassigned', color: '#1565C0', icon: 'people-outline',   bg: '#E3F2FD' },
 };
 
 export default function AlertSavedScreen() {
@@ -65,9 +65,16 @@ export default function AlertSavedScreen() {
 
       <View style={styles.container}>
 
-        {/* Status icon */}
-        <View style={[styles.iconCircle, { backgroundColor: config.bg }]}>
-          <Ionicons name={config.icon} size={64} color={config.color} />
+        {/* Status icon — shows sync state */}
+        <View style={[
+          styles.iconCircle,
+          { backgroundColor: synced ? '#E8F5E9' : '#FFF8E1' },
+        ]}>
+          <Ionicons
+            name={syncing ? 'sync-outline' : synced ? 'checkmark-circle' : 'time-outline'}
+            size={64}
+            color={synced ? '#2E7D32' : '#F57F17'}
+          />
         </View>
 
         <Text style={styles.title}>Response Recorded</Text>

@@ -21,6 +21,7 @@ export const MOCK_ALERTS = [
     longitude: 80.9250,
     acknowledgedBy: null,
     acknowledgedAt: null,
+    animalImageUrl: null,
   },
   {
     id: 'ALT-002',
@@ -39,6 +40,7 @@ export const MOCK_ALERTS = [
     longitude: 80.0600,
     acknowledgedBy: null,
     acknowledgedAt: null,
+    animalImageUrl: null,
   },
   {
     id: 'ALT-003',
@@ -57,6 +59,7 @@ export const MOCK_ALERTS = [
     longitude: 81.5400,
     acknowledgedBy: null,
     acknowledgedAt: null,
+    animalImageUrl: null,
   },
   {
     id: 'ALT-004',
@@ -75,5 +78,6 @@ export const MOCK_ALERTS = [
     longitude: 81.5180,
     acknowledgedBy: 'RNG-001',
     acknowledgedAt: '2026-10-06T14:35:00.000Z',
+    animalImageUrl: null,
   },
 ];

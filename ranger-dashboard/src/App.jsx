@@ -8,6 +8,8 @@ import CommunityReports from './pages/CommunityReports.jsx';
 import VerifyRangers from './pages/VerifyRangers.jsx';
 import Settings from './pages/Settings.jsx';
 import Login from './pages/Login.jsx';
+import WildlifeAlerts from './pages/WildlifeAlerts.jsx';
+import Analytics from './pages/Analytics.jsx';
 
 const PrivateRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('admin_auth') === 'true';
@@ -25,8 +27,8 @@ export default function App() {
         <Route path="incidents"  element={<PlaceholderPage title="Incidents"                   member={3} />} />
         <Route path="community"  element={<CommunityReports />} />
         <Route path="wildlife"   element={<PlaceholderPage title="Wildlife"                    member={4} />} />
-        <Route path="alerts"     element={<PlaceholderPage title="Wildlife Alerts"             member={4} />} />
-        <Route path="analytics"  element={<PlaceholderPage title="Analytics & Reports"         member={4} />} />
+        <Route path="alerts"     element={<WildlifeAlerts />} />
+        <Route path="analytics"  element={<Analytics />} />
         <Route path="reports"    element={<PlaceholderPage title="Reports"                     member={4} />} />
         <Route path="verify"     element={<VerifyRangers />} />
         <Route path="settings"   element={<Settings />} />

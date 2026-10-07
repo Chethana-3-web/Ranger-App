@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
-  StyleSheet, ActivityIndicator,
+  StyleSheet, ActivityIndicator, RefreshControl, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -56,16 +56,28 @@ function AlertCard({ alert, onPress }) {
         </View>
       </View>
 
-      <Text style={styles.alertType}>{alert.type}</Text>
-      {alert.animalName ? (
-        <Text style={styles.animalName}>
-          <Ionicons name="paw-outline" size={13} color={COLORS.TEXT_SECONDARY} /> {alert.animalName}
-        </Text>
-      ) : null}
-      <Text style={styles.zone}>
-        <Ionicons name="location-outline" size={13} color={COLORS.TEXT_SECONDARY} /> {alert.riskZone}
-      </Text>
-      <Text style={styles.meta}>{date}  {time}  ·  {alert.parkName}</Text>
+      <View style={styles.cardBody}>
+        {alert.animalImageUrl ? (
+          <Image source={{ uri: alert.animalImageUrl }} style={styles.animalThumb} />
+        ) : alert.animalName ? (
+          <View style={styles.animalThumbPlaceholder}>
+            <Ionicons name="paw" size={22} color={COLORS.TEXT_SECONDARY} />
+          </View>
+        ) : null}
+
+        <View style={styles.cardBodyText}>
+          <Text style={styles.alertType}>{alert.type}</Text>
+          {alert.animalName ? (
+            <Text style={styles.animalName}>
+              <Ionicons name="paw-outline" size={13} color={COLORS.TEXT_SECONDARY} /> {alert.animalName}
+            </Text>
+          ) : null}
+          <Text style={styles.zone}>
+            <Ionicons name="location-outline" size={13} color={COLORS.TEXT_SECONDARY} /> {alert.riskZone}
+          </Text>
+          <Text style={styles.meta}>{date}  {time}  ·  {alert.parkName}</Text>
+        </View>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -74,8 +86,17 @@ function AlertCard({ alert, onPress }) {
 
 export default function AlertListScreen() {
   const navigation = useNavigation();
-  const { alerts, loading, isOffline } = useAlerts();
-  const [filter, setFilter] = useState('All');
+  const { alerts, loading, isOffline } = useAlerts(refreshKey);
+  const [filter,     setFilter]     = useState('All');
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Re-subscribe on manual pull-to-refresh
+  const [refreshKey, setRefreshKey] = useState(0);
+  const handleRefresh = () => {
+    setRefreshing(true);
+    setRefreshKey((k) => k + 1);
+    setTimeout(() => setRefreshing(false), 1000);
+  };
 
   const filtered = alerts.filter((a) => {
     if (filter === 'All')       return true;
@@ -130,6 +151,14 @@ export default function AlertListScreen() {
             />
           )}
           contentContainerStyle={styles.list}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={[COLORS.PRIMARY]}
+              tintColor={COLORS.PRIMARY}
+            />
+          }
           ListEmptyComponent={
             <View style={styles.center}>
               <Ionicons name="notifications-off-outline" size={56} color={COLORS.BORDER} />
@@ -195,4 +224,9 @@ const styles = StyleSheet.create({
   animalName: { fontSize: 13, color: COLORS.TEXT_SECONDARY, marginBottom: 2 },
   zone:       { fontSize: 13, color: COLORS.TEXT_SECONDARY, marginBottom: 4 },
   meta:       { fontSize: 11, color: COLORS.TEXT_SECONDARY },
+
+  cardBody:             { flexDirection: 'row', gap: 12, alignItems: 'flex-start', marginTop: 4 },
+  cardBodyText:         { flex: 1 },
+  animalThumb:          { width: 60, height: 60, borderRadius: 8 },
+  animalThumbPlaceholder: { width: 60, height: 60, borderRadius: 8, backgroundColor: COLORS.BACKGROUND, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: COLORS.BORDER },
 });

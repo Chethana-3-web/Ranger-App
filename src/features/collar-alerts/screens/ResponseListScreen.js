@@ -7,7 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
-  StyleSheet, ActivityIndicator, Image,
+  StyleSheet, ActivityIndicator, Image, Alert, RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,7 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import AppHeader from '../../../core/ui/AppHeader';
 import OfflineBanner from '../../../core/ui/OfflineBanner';
-import { subscribeToRangerResponses } from '../services/alertService';
+import { subscribeToRangerResponses, deleteAlertResponse } from '../services/alertService';
 import { useSession } from '../../../core/session/SessionContext';
 import COLORS from '../../../core/constants/colors';
 import theme from '../../../core/ui/theme';
@@ -32,7 +32,7 @@ const OUTCOME_ICON = {
   Reassigned: 'people-outline',
 };
 
-function ResponseCard({ item, onPress }) {
+function ResponseCard({ item, onPress, onDelete }) {
   const color = OUTCOME_COLOR[item.outcome] ?? '#555';
   const icon  = OUTCOME_ICON[item.outcome]  ?? 'document-outline';
 
@@ -53,7 +53,14 @@ function ResponseCard({ item, onPress }) {
           <Ionicons name={icon} size={14} color={color} />
           <Text style={[styles.outcomeText, { color }]}>{item.outcome}</Text>
         </View>
-        <Ionicons name="create-outline" size={18} color={COLORS.TEXT_SECONDARY} />
+        <View style={styles.cardActions}>
+          <TouchableOpacity onPress={onPress} style={styles.editBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="create-outline" size={18} color={COLORS.TEXT_SECONDARY} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onDelete} style={styles.deleteBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="trash-outline" size={18} color="#C62828" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Text style={styles.alertId}>Alert: {item.alertId}</Text>
@@ -74,18 +81,47 @@ function ResponseCard({ item, onPress }) {
 export default function ResponseListScreen() {
   const navigation    = useNavigation();
   const { ranger }    = useSession();
-  const [responses, setResponses] = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState(null);
+  const [responses,  setResponses]  = useState([]);
+  const [loading,    setLoading]    = useState(true);
+  const [error,      setError]      = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const unsub = subscribeToRangerResponses(ranger.id, ({ data, error: err }) => {
       setResponses(data);
       setError(err);
       setLoading(false);
+      setRefreshing(false);
     });
     return unsub;
-  }, [ranger.id]);
+  }, [ranger.id, refreshKey]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleDelete = (item) => {
+    Alert.alert(
+      'Delete Response',
+      'This will permanently remove this response. Are you sure?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteAlertResponse(item.id);
+            } catch {
+              Alert.alert('Error', 'Could not delete. Please try again.');
+            }
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
@@ -108,9 +144,18 @@ export default function ResponseListScreen() {
             <ResponseCard
               item={item}
               onPress={() => navigation.navigate('ResponseEdit', { response: item })}
+              onDelete={() => handleDelete(item)}
             />
           )}
           contentContainerStyle={styles.list}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={[COLORS.PRIMARY]}
+              tintColor={COLORS.PRIMARY}
+            />
+          }
           ListEmptyComponent={
             <View style={styles.center}>
               <Ionicons name="document-outline" size={56} color={COLORS.BORDER} />
@@ -138,6 +183,9 @@ const styles = StyleSheet.create({
   cardHeader:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   outcomeBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
   outcomeText:  { fontSize: 12, fontWeight: '700' },
+  cardActions:  { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  editBtn:      { padding: 2 },
+  deleteBtn:    { padding: 2 },
   alertId:      { fontSize: 12, color: COLORS.TEXT_SECONDARY, marginBottom: 4 },
   notes:        { fontSize: 14, color: COLORS.TEXT_PRIMARY, lineHeight: 20, marginBottom: 8 },
   thumb:        { width: '100%', height: 140, borderRadius: 8, marginBottom: 8 },

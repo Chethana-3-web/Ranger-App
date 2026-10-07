@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { subscribeToAlerts } from '../services/alertService';
 
-export function useAlerts() {
+export function useAlerts(refreshKey = 0) {
   const [alerts,   setAlerts]   = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState(null);
@@ -18,7 +18,7 @@ export function useAlerts() {
       setLoading(ld);
     });
     return unsub;
-  }, []);
+  }, [refreshKey]);
 
   return { alerts, loading, error, isOffline: !!error };
 }
