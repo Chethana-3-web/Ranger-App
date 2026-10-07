@@ -30,8 +30,15 @@
     },
     "extra": {
       "eas": {
-        "projectId": "ranger-app-se3070"
+        "projectId": "237eb1b5-d8f8-4c1a-a8dc-d22ce632f684"
       }
+    },
+    "owner": "cheind",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/237eb1b5-d8f8-4c1a-a8dc-d22ce632f684"
     }
   }
 }
