@@ -235,3 +235,14 @@ export function subscribeToAnimalProfile(animalId, callback) {
   );
   return unsub;
 }
+
+// ── Delete an alert ───────────────────────────────────────────────────────────
+
+/**
+ * Permanently delete a collar_alert document.
+ * @param {string} alertId
+ * @returns {Promise<void>}
+ */
+export async function deleteAlert(alertId) {
+  await deleteDoc(doc(db, 'collar_alerts', alertId));
+}

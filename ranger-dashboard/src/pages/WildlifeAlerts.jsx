@@ -5,12 +5,13 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { AlertTriangle, Eye, CheckCircle, Users, RefreshCw, Clock, MapPin, Radio, ChevronRight } from 'lucide-react';
+import { AlertTriangle, Eye, CheckCircle, Users, RefreshCw, Clock, MapPin, Radio, ChevronRight, Trash2 } from 'lucide-react';
 import {
   subscribeToCollarAlerts,
   subscribeToAlertResponses,
   updateAlertStatus,
   getAnimalById,
+  deleteCollarAlert,
 } from '../services/alertService.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -172,6 +173,17 @@ export default function WildlifeAlerts() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!selected) return;
+    if (!window.confirm(`Delete alert "${selected.type}"? This cannot be undone.`)) return;
+    try {
+      await deleteCollarAlert(selected.id);
+      setSelected(null);
+    } catch (e) {
+      alert('Failed to delete alert: ' + e.message);
+    }
+  };
+
   // Summary counts
   const counts = useMemo(() => ({
     total:    alerts.length,
@@ -275,6 +287,11 @@ export default function WildlifeAlerts() {
                   <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6, background: statusColor(selected.status) + '18', color: statusColor(selected.status) }}>
                     {selected.status}
                   </span>
+                  {/* Delete button */}
+                  <button onClick={handleDelete}
+                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', border: '1px solid #fca5a5', borderRadius: 6, background: '#fef2f2', color: '#b91c1c', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+                    <Trash2 size={12} /> Delete
+                  </button>
                 </div>
               </div>
 
@@ -295,25 +312,29 @@ export default function WildlifeAlerts() {
 
               {/* Animal info */}
               {selected.animalName && (
-                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '12px 14px', marginBottom: 20 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#15803d', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Animal</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                    {[
-                      ['Name',    selected.animalName],
-                      ['Species', selected.species ?? animal?.species ?? '—'],
-                      ['ID',      selected.animalId ?? '—'],
-                      ['Collar',  selected.collarId ?? '—'],
-                    ].map(([k, v]) => (
-                      <div key={k}>
-                        <span style={{ fontSize: 11, color: '#6b7280' }}>{k}: </span>
-                        <span style={{ fontSize: 13, fontWeight: 600 }}>{v}</span>
-                      </div>
-                    ))}
-                  </div>
+                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, marginBottom: 20, overflow: 'hidden' }}>
                   {selected.animalImageUrl && (
-                    <img src={selected.animalImageUrl} alt={selected.animalName}
-                      style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 8, marginTop: 10 }} />
+                    <div style={{ width: '100%', aspectRatio: '4/3', overflow: 'hidden' }}>
+                      <img src={selected.animalImageUrl} alt={selected.animalName}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    </div>
                   )}
+                  <div style={{ padding: '12px 14px' }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: '#15803d', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Animal</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      {[
+                        ['Name',    selected.animalName],
+                        ['Species', selected.species ?? animal?.species ?? '—'],
+                        ['ID',      selected.animalId ?? '—'],
+                        ['Collar',  selected.collarId ?? '—'],
+                      ].map(([k, v]) => (
+                        <div key={k}>
+                          <span style={{ fontSize: 11, color: '#6b7280' }}>{k}: </span>
+                          <span style={{ fontSize: 13, fontWeight: 600 }}>{v}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
 

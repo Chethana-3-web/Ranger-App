@@ -6,7 +6,7 @@
 
 import {
   collection, onSnapshot, query, orderBy,
-  doc, updateDoc, serverTimestamp, where,
+  doc, updateDoc, serverTimestamp, where, deleteDoc,
 } from 'firebase/firestore';
 import { db } from './firebase.js';
 import { WILDLIFE_ALERTS, WILDLIFE } from '../data/mockData.js';
@@ -66,4 +66,10 @@ export async function updateAlertStatus(alertId, status) {
 
 export function getAnimalById(animalId) {
   return WILDLIFE.find((w) => w.id === animalId) ?? null;
+}
+
+// ── Delete an alert ───────────────────────────────────────────────────────────
+
+export async function deleteCollarAlert(alertId) {
+  await deleteDoc(doc(db, 'collar_alerts', alertId));
 }

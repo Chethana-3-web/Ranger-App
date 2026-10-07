@@ -7,7 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, ActivityIndicator, Image,
+  StyleSheet, ActivityIndicator, Image, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,7 +15,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 
 import AppHeader from '../../../core/ui/AppHeader';
 import OfflineBanner from '../../../core/ui/OfflineBanner';
-import { subscribeToAlert, acknowledgeAlert, subscribeToAnimalProfile } from '../services/alertService';
+import { subscribeToAlert, acknowledgeAlert, subscribeToAnimalProfile, deleteAlert } from '../services/alertService';
 import { useSession } from '../../../core/session/SessionContext';
 import COLORS from '../../../core/constants/colors';
 import theme from '../../../core/ui/theme';
@@ -96,6 +96,20 @@ export default function AlertDetailScreen() {
     } finally {
       setAcknowledging(false);
     }
+  };
+
+  const handleDelete = () => {
+    Alert.alert('Delete Alert', 'Permanently remove this alert?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        try {
+          await deleteAlert(alert.id);
+          navigation.navigate('AlertList');
+        } catch {
+          Alert.alert('Error', 'Could not delete. Try again.');
+        }
+      }},
+    ]);
   };
 
   if (loading) {
@@ -199,6 +213,12 @@ export default function AlertDetailScreen() {
           <Text style={styles.primaryBtnText}>View Location & Respond</Text>
         </TouchableOpacity>
 
+        {/* Delete alert */}
+        <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
+          <Ionicons name="trash-outline" size={16} color="#C62828" />
+          <Text style={styles.deleteBtnText}>Delete Alert</Text>
+        </TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -240,4 +260,7 @@ const styles = StyleSheet.create({
 
   primaryBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: COLORS.PRIMARY_LIGHT, borderRadius: 12, paddingVertical: 16, marginTop: 4 },
   primaryBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+
+  deleteBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14, paddingVertical: 12 },
+  deleteBtnText: { color: '#C62828', fontSize: 14, fontWeight: '600' },
 });

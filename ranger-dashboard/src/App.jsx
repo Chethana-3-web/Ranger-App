@@ -11,6 +11,7 @@ import Login from './pages/Login.jsx';
 import WildlifeAlerts from './pages/WildlifeAlerts.jsx';
 import Analytics from './pages/Analytics.jsx';
 import Wildlife from './pages/Wildlife.jsx';
+import Reports from './pages/Reports.jsx';
 
 const PrivateRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('admin_auth') === 'true';
@@ -30,7 +31,7 @@ export default function App() {
         <Route path="wildlife"   element={<Wildlife />} />
         <Route path="alerts"     element={<WildlifeAlerts />} />
         <Route path="analytics"  element={<Analytics />} />
-        <Route path="reports"    element={<PlaceholderPage title="Reports"                     member={4} />} />
+        <Route path="reports"    element={<Reports />} />
         <Route path="verify"     element={<VerifyRangers />} />
         <Route path="settings"   element={<Settings />} />
       </Route>
