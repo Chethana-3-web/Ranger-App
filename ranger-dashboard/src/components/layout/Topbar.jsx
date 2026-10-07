@@ -24,7 +24,7 @@ export default function Topbar() {
 
   return (
     <header className="topbar">
-      <span className="topbar-title">{TITLES[pathname] ?? 'Dashboard'}</span>
+      <span className="topbar-title">{TITLES[pathname] ?? TITLES[`/${pathname.split('/')[1]}`] ?? 'Dashboard'}</span>
       <div className="topbar-right">
         <SyncStatusChip status={syncStatus} />
       </div>

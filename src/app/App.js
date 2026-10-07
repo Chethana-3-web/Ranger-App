@@ -12,7 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 
-import { SessionProvider } from '../core/session/SessionContext';
+import { AuthProvider } from '../context/AuthContext';
 import RootNavigator from '../navigation/RootNavigator';
 import SimulatorPanel from '../core/simulator/SimulatorPanel';
 import { createContainer } from '../core/di/container';
@@ -55,18 +55,22 @@ const diContainer = buildContainer();
 setDIContainer(diContainer);
 setServicesContainer(diContainer);
 
+import { SessionProvider } from '../core/session/SessionContext';
+
 const App = () => {
   const [simulatorPanelVisible, setSimulatorPanelVisible] = useState(false);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <SessionProvider>
-          <NavigationContainer>
-            <StatusBar barStyle="light-content" backgroundColor="#1B5E20" />
-            <RootNavigator onLongPressHeader={() => setSimulatorPanelVisible(true)} />
-          </NavigationContainer>
-        </SessionProvider>
+        <AuthProvider>
+          <SessionProvider>
+            <NavigationContainer>
+              <StatusBar barStyle="light-content" backgroundColor="#1B5E20" />
+              <RootNavigator onLongPressHeader={() => setSimulatorPanelVisible(true)} />
+            </NavigationContainer>
+          </SessionProvider>
+        </AuthProvider>
 
         {__DEV__ && (
           <SimulatorPanel

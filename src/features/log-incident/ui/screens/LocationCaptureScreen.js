@@ -10,6 +10,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../../../context/AuthContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 import { GpsLocationProvider } from '../../infrastructure/gpsLocationProvider';
@@ -22,6 +23,8 @@ import { useDraftRepo } from '../hooks/useDraftRepo';
 
 const LocationCaptureScreen = () => {
   const navigation = useNavigation();
+  const auth = useAuth();
+  const isCommunity = auth?.user?.role === 'community';
   const route = useRoute();
   const draftRepo = useDraftRepo();
 
@@ -33,6 +36,7 @@ const LocationCaptureScreen = () => {
   const [status, setStatus]               = useState('acquiring');
   const [location, setLocation]           = useState(null);
   const [showManualDialog, setShowManualDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   // Run GPS acquisition exactly once on mount
   useEffect(() => {
@@ -72,7 +76,12 @@ const LocationCaptureScreen = () => {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <AppHeader title="Capturing Location" subtitle="Step 3 of 4" />
+      <AppHeader 
+        title="Capturing Location" 
+        subtitle="Step 3 of 4" 
+        onBack={() => navigation.goBack()}
+        onClose={() => setShowCancelDialog(true)}
+      />
 
       <View style={styles.body}>
 
@@ -146,3 +155,10 @@ const styles = StyleSheet.create({
 });
 
 export default LocationCaptureScreen;
+
+
+
+
+
+
+

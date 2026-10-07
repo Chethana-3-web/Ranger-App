@@ -13,7 +13,7 @@
  * ERROR        – any non-2xx response or network failure
  */
 
-const PROJECT_ID = 'ranger-app-b7637';
+const PROJECT_ID = 'ranger-abaec';
 const BASE_URL   = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
 /**
@@ -65,7 +65,8 @@ export function FirebaseRemoteGateway() {
      */
     async upload(incident) {
       try {
-        const url  = `${BASE_URL}/incidents/${incident.id}`;
+        const collectionName = incident.reportType === 'COMMUNITY' ? 'community_reports' : 'incidents';
+        const url  = `${BASE_URL}/${collectionName}/${incident.id}`;
         const body = toFirestoreDoc({
           ...incident,
           uploadedAt: new Date().toISOString(),
