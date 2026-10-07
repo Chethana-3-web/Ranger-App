@@ -18,7 +18,7 @@ export default function OfficerDashboard({ navigation }) {
         <View style={styles.actions}>
           <PrimaryButton 
             label="Community Reports" 
-            onPress={() => console.log('Placeholder: View Reports')} 
+            onPress={() => navigation.navigate('OfficerReports')} 
           />
           <View style={styles.spacer} />
           
