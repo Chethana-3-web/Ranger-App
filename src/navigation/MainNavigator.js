@@ -25,8 +25,16 @@ import COLORS from '../core/constants/colors';
 // Core screens
 import HomeScreen            from '../screens/HomeScreen';
 import IncidentListScreen    from '../screens/IncidentListScreen';
-import AlertsScreen          from '../screens/AlertsScreen';
 import ProfileScreen         from '../screens/ProfileScreen';
+
+// Collar alerts feature screens
+import AlertListScreen     from '../features/collar-alerts/screens/AlertListScreen';
+import AlertDetailScreen   from '../features/collar-alerts/screens/AlertDetailScreen';
+import AlertLocationScreen from '../features/collar-alerts/screens/AlertLocationScreen';
+import AlertRespondScreen  from '../features/collar-alerts/screens/AlertRespondScreen';
+import AlertSavedScreen    from '../features/collar-alerts/screens/AlertSavedScreen';
+import ResponseListScreen  from '../features/collar-alerts/screens/ResponseListScreen';
+import ResponseEditScreen  from '../features/collar-alerts/screens/ResponseEditScreen';
 
 // Log Incident feature screens
 import IncidentTypeScreen    from '../features/log-incident/ui/screens/IncidentTypeScreen';
@@ -58,6 +66,20 @@ const LogIncidentFlow = () => (
     <Stack.Screen name="ManualLocation"  component={ManualLocationScreen} />
     <Stack.Screen name="Details"         component={DetailsScreen} />
     <Stack.Screen name="Saved"           component={SavedScreen} />
+  </Stack.Navigator>
+);
+
+// ── Alerts tab stack ──────────────────────────────────────────────────────────
+
+const AlertStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="AlertList"     component={AlertListScreen} />
+    <Stack.Screen name="AlertDetail"   component={AlertDetailScreen} />
+    <Stack.Screen name="AlertLocation" component={AlertLocationScreen} />
+    <Stack.Screen name="AlertRespond"  component={AlertRespondScreen} />
+    <Stack.Screen name="AlertSaved"    component={AlertSavedScreen} />
+    <Stack.Screen name="ResponseList"  component={ResponseListScreen} />
+    <Stack.Screen name="ResponseEdit"  component={ResponseEditScreen} />
   </Stack.Navigator>
 );
 
@@ -106,7 +128,7 @@ const MainNavigator = () => {
     >
       <Tab.Screen name="Home"      component={HomeScreen}     options={{ tabBarLabel: 'Home' }} />
       <Tab.Screen name="Incidents" component={IncidentStack}  options={{ tabBarLabel: 'Incidents' }} />
-      <Tab.Screen name="Alerts"    component={AlertsScreen}   options={{ tabBarLabel: 'Alerts' }} />
+      <Tab.Screen name="Alerts"    component={AlertStack}    options={{ tabBarLabel: 'Alerts' }} />
       <Tab.Screen name="Profile"   component={ProfileScreen}  options={{ tabBarLabel: 'Profile' }} />
     </Tab.Navigator>
   );
