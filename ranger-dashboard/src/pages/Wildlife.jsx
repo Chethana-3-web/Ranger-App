@@ -1,7 +1,7 @@
-/**
- * Wildlife — Member 4 dashboard page.
+﻿/**
+ * Wildlife ΓÇö Member 4 dashboard page.
  * Admin manages collared animal profiles here.
- * These are ALL tracked animals — NOT alerts.
+ * These are ALL tracked animals ΓÇö NOT alerts.
  * Alerts are separate events in collar_alerts collection.
  */
 
@@ -11,7 +11,7 @@ import {
   deleteAnimal, uploadAnimalPhoto, triggerCollarAlert,
 } from '../services/animalService.js';
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Constants ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 const SPECIES_OPTIONS = [
   'Sri Lankan Elephant',
@@ -43,18 +43,18 @@ const EMPTY_FORM = {
   latitude: '', longitude: '', zone: '', notes: '',
 };
 
-// ── Risk zone presets ─────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Risk zone presets ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 const RISK_ZONES = [
   { name: 'Farmland Zone F-04',           riskLevel: 'High',     latitude: 6.5050,  longitude: 80.9250 },
   { name: 'A12 Highway Crossing Point',   riskLevel: 'Medium',   latitude: 8.4820,  longitude: 80.0600 },
   { name: 'North Yala Sector A',          riskLevel: 'Critical', latitude: 6.4150,  longitude: 81.5400 },
-  { name: 'Village Boundary – South Yala',riskLevel: 'High',     latitude: 6.3620,  longitude: 81.5180 },
+  { name: 'Village Boundary ΓÇô South Yala',riskLevel: 'High',     latitude: 6.3620,  longitude: 81.5180 },
   { name: 'Reservoir Buffer Zone',        riskLevel: 'Medium',   latitude: 6.4950,  longitude: 80.9180 },
-  { name: 'Road Crossing – Sinharaja',    riskLevel: 'Low',      latitude: 6.4000,  longitude: 80.4820 },
+  { name: 'Road Crossing ΓÇô Sinharaja',    riskLevel: 'Low',      latitude: 6.4000,  longitude: 80.4820 },
 ];
 
-// ── Trigger Alert Modal ───────────────────────────────────────────────────────
+// ΓöÇΓöÇ Trigger Alert Modal ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 function TriggerAlertModal({ animal, onClose }) {
   const [selectedZone, setSelectedZone] = useState(RISK_ZONES[0]);
@@ -79,21 +79,21 @@ function TriggerAlertModal({ animal, onClose }) {
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ background: '#fff', borderRadius: 12, padding: 24, width: 440 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h3 style={{ margin: 0, color: '#b91c1c' }}>⚡ Trigger Collar Alert</h3>
+          <h3 style={{ margin: 0, color: '#b91c1c' }}>ΓÜí Trigger Collar Alert</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
         </div>
 
         {done ? (
           <div style={{ textAlign: 'center', padding: '20px 0', color: '#15803d' }}>
-            <div style={{ fontSize: 40 }}>✅</div>
+            <div style={{ fontSize: 40 }}>Γ£à</div>
             <p style={{ fontWeight: 700, marginTop: 8 }}>Alert generated successfully!</p>
             <p style={{ fontSize: 13, color: '#6b7280' }}>Rangers will be notified on their devices.</p>
           </div>
         ) : (
           <>
             <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 700 }}>🐾 {animal.name}</div>
-              <div style={{ fontSize: 12, color: '#6b7280' }}>{animal.species} · {animal.collarId}</div>
+              <div style={{ fontSize: 13, fontWeight: 700 }}>≡ƒÉ╛ {animal.name}</div>
+              <div style={{ fontSize: 12, color: '#6b7280' }}>{animal.species} ┬╖ {animal.collarId}</div>
             </div>
 
             <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 6 }}>Select Risk Zone</label>
@@ -111,7 +111,7 @@ function TriggerAlertModal({ animal, onClose }) {
               <button onClick={onClose} style={{ flex: 1, padding: '9px', border: '1px solid #d1d5db', borderRadius: 6, background: '#f9fafb', cursor: 'pointer', fontSize: 13 }}>Cancel</button>
               <button onClick={handleTrigger} disabled={triggering}
                 style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px', border: 'none', borderRadius: 6, background: '#b91c1c', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 700, opacity: triggering ? 0.7 : 1 }}>
-                <Zap size={15} /> {triggering ? 'Generating…' : 'Generate Alert'}
+                <Zap size={15} /> {triggering ? 'GeneratingΓÇª' : 'Generate Alert'}
               </button>
             </div>
           </>
@@ -121,7 +121,7 @@ function TriggerAlertModal({ animal, onClose }) {
   );
 }
 
-// ── Animal card ───────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Animal card ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 function AnimalCard({ animal, onEdit, onDelete, onUploadPhoto, onTrigger }) {
   const sc  = STATUS_COLOR[animal.status] ?? STATUS_COLOR.Active;
@@ -166,10 +166,10 @@ function AnimalCard({ animal, onEdit, onDelete, onUploadPhoto, onTrigger }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginBottom: 10 }}>
           <div style={{ fontSize: 12, color: '#6b7280' }}>
             <Radio size={11} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-            Collar: <strong>{animal.collarId || '—'}</strong>
+            Collar: <strong>{animal.collarId || 'ΓÇö'}</strong>
           </div>
           <div style={{ fontSize: 12, color: '#6b7280' }}>
-            Park: <strong>{PARKS.find((p) => p.id === animal.parkId)?.name ?? animal.parkId ?? '—'}</strong>
+            Park: <strong>{PARKS.find((p) => p.id === animal.parkId)?.name ?? animal.parkId ?? 'ΓÇö'}</strong>
           </div>
           {animal.zone && <div style={{ fontSize: 12, color: '#6b7280' }}>Zone: <strong>{animal.zone}</strong></div>}
         </div>
@@ -190,7 +190,7 @@ function AnimalCard({ animal, onEdit, onDelete, onUploadPhoto, onTrigger }) {
   );
 }
 
-// ── Field component (outside AnimalForm to prevent focus loss) ───────────────
+// ΓöÇΓöÇ Field component (outside AnimalForm to prevent focus loss) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 function Field({ label, name, type = 'text', options, value, onChange }) {
   return (
@@ -209,7 +209,7 @@ function Field({ label, name, type = 'text', options, value, onChange }) {
   );
 }
 
-// ── Animal form modal ─────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Animal form modal ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 function AnimalForm({ initial, onSave, onClose, saving }) {
   const [form, setForm] = useState(initial ?? EMPTY_FORM);
@@ -277,7 +277,7 @@ function AnimalForm({ initial, onSave, onClose, saving }) {
           <button onClick={onClose} style={{ padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: 6, background: '#f9fafb', cursor: 'pointer', fontSize: 13 }}>Cancel</button>
           <button onClick={() => onSave(form)} disabled={saving || !form.name || !form.id}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', border: 'none', borderRadius: 6, background: '#1B5E20', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600, opacity: (saving || !form.name || !form.id) ? 0.6 : 1 }}>
-            <Save size={14} /> {saving ? 'Saving…' : 'Save Animal'}
+            <Save size={14} /> {saving ? 'SavingΓÇª' : 'Save Animal'}
           </button>
         </div>
       </div>
@@ -285,7 +285,7 @@ function AnimalForm({ initial, onSave, onClose, saving }) {
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Main page ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 export default function Wildlife() {
   const [animals,    setAnimals]    = useState([]);
@@ -370,7 +370,7 @@ export default function Wildlife() {
 
       {/* Filters */}
       <div style={{ display: 'flex', gap: 10 }}>
-        <input placeholder="Search by name, species, collar…" value={search} onChange={(e) => setSearch(e.target.value)}
+        <input placeholder="Search by name, species, collarΓÇª" value={search} onChange={(e) => setSearch(e.target.value)}
           style={{ flex: 1, padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }} />
         <select value={parkFilter} onChange={(e) => setParkFilter(e.target.value)}
           style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }}>
@@ -396,7 +396,7 @@ export default function Wildlife() {
 
       {/* Grid */}
       {loading ? (
-        <div style={{ textAlign: 'center', color: '#6b7280', paddingTop: 40 }}>Loading animals…</div>
+        <div style={{ textAlign: 'center', color: '#6b7280', paddingTop: 40 }}>Loading animalsΓÇª</div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: 'center', color: '#9ca3af', paddingTop: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
           <PawPrint size={40} color="#d1d5db" />

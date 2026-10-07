@@ -1,5 +1,5 @@
-/**
- * alertService.js — Firestore alert integration for the web dashboard.
+﻿/**
+ * alertService.js ΓÇö Firestore alert integration for the web dashboard.
  * Reads collar_alerts and collar_responses collections.
  * Falls back to mockData if Firestore is unreachable.
  */
@@ -11,7 +11,7 @@ import {
 import { db } from './firebase.js';
 import { WILDLIFE_ALERTS, WILDLIFE } from '../data/mockData.js';
 
-// ── Subscribe to all collar alerts ───────────────────────────────────────────
+// ΓöÇΓöÇ Subscribe to all collar alerts ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 export function subscribeToCollarAlerts(callback) {
   callback({ data: [], error: null, loading: true });
@@ -30,7 +30,7 @@ export function subscribeToCollarAlerts(callback) {
   );
 }
 
-// ── Subscribe to responses for a specific alert ───────────────────────────────
+// ΓöÇΓöÇ Subscribe to responses for a specific alert ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 export function subscribeToAlertResponses(alertId, callback) {
   const q = query(
@@ -53,7 +53,7 @@ export function subscribeToAlertResponses(alertId, callback) {
   );
 }
 
-// ── Update alert status ───────────────────────────────────────────────────────
+// ΓöÇΓöÇ Update alert status ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 export async function updateAlertStatus(alertId, status) {
   await updateDoc(doc(db, 'collar_alerts', alertId), {
@@ -62,13 +62,13 @@ export async function updateAlertStatus(alertId, status) {
   });
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 export function getAnimalById(animalId) {
   return WILDLIFE.find((w) => w.id === animalId) ?? null;
 }
 
-// ── Delete an alert ───────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Delete an alert ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 export async function deleteCollarAlert(alertId) {
   await deleteDoc(doc(db, 'collar_alerts', alertId));

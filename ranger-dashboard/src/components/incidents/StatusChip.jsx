@@ -1,4 +1,4 @@
-
+﻿
 const STATUS_STYLE = {
   'New':          { bg: '#dbeafe', text: '#1d4ed8' },
   'Under Review': { bg: '#ede9fe', text: '#6d28d9' },
@@ -7,7 +7,7 @@ const STATUS_STYLE = {
   'Resolved':     { bg: '#dcfce7', text: '#15803d' },
 };
 
-/** StatusChip – coloured badge for an incident workflow status. */
+/** StatusChip ΓÇô coloured badge for an incident workflow status. */
 export default function StatusChip({ status }) {
   const st = STATUS_STYLE[status] ?? { bg: '#f3f4f6', text: '#4b5563' };
   return (

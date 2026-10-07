@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+﻿import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, X, ChevronRight, SearchX, ClipboardList, Inbox, Activity, CheckCircle2, AlertTriangle, UserX,
@@ -28,14 +28,14 @@ const TYPE_COLORS = {
 };
 
 function formatDateTime(iso) {
-  if (!iso) return '—';
+  if (!iso) return 'ΓÇö';
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? iso : date.toLocaleString();
 }
 
 /** "5 min ago" for recent reports, the date for older ones. */
 function formatRelative(iso) {
-  if (!iso) return '—';
+  if (!iso) return 'ΓÇö';
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   const minutes = Math.round((Date.now() - date.getTime()) / 60000);
@@ -66,7 +66,7 @@ const StatTile = ({ icon: Icon, tint, label, value, hint }) => (
 );
 
 /**
- * Incidents – summary stats and a table of all incidents with search and filters.
+ * Incidents ΓÇô summary stats and a table of all incidents with search and filters.
  * Clicking a row opens the incident details page.
  */
 export default function Incidents() {
@@ -135,7 +135,7 @@ export default function Incidents() {
   };
 
   const openIncident = (i) => navigate(`/incidents/${encodeURIComponent(i.id)}`);
-  const shown = (n) => (loading ? '–' : n);
+  const shown = (n) => (loading ? 'ΓÇô' : n);
 
   return (
     <div className="incidents-page">
@@ -189,7 +189,7 @@ export default function Incidents() {
         </div>
 
         <div className="incidents-count">
-          {loading ? 'Loading incidents…' : `Showing ${filtered.length} of ${incidents.length} incidents`}
+          {loading ? 'Loading incidentsΓÇª' : `Showing ${filtered.length} of ${incidents.length} incidents`}
         </div>
 
         <div className="incidents-table-wrap">
@@ -226,12 +226,12 @@ export default function Incidents() {
                           <div className="incident-type">{i.label ?? i.type}</div>
                           <div className="incident-sub" title={i.id}>
                             <span className="incident-id">{i.id}</span>
-                            {i.description ? ` · ${i.description}` : ''}
+                            {i.description ? ` ┬╖ ${i.description}` : ''}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td>{getParkById(i.parkId)?.name ?? i.parkId ?? '—'}</td>
+                    <td>{getParkById(i.parkId)?.name ?? i.parkId ?? 'ΓÇö'}</td>
                     <td><SeverityChip severity={i.severity} /></td>
                     <td><StatusChip status={i.workflowStatus} /></td>
                     <td>

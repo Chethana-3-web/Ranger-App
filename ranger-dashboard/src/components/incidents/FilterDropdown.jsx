@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect, useId } from 'react';
+﻿import { useState, useRef, useEffect, useId } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
 
 /**
- * FilterDropdown – custom single-select dropdown for filter bars.
+ * FilterDropdown ΓÇô custom single-select dropdown for filter bars.
  * Shows "Label: Selected" on the button and a menu with a check on the
  * selected option. Supports click-outside, Escape, arrow keys and Enter.
  *

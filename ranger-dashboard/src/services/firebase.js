@@ -1,10 +1,10 @@
-/**
- * firebase.js — Dashboard Firebase initialisation.
+﻿/**
+ * firebase.js ΓÇö Dashboard Firebase initialisation.
  *
  * Connects to the same Firestore project used by the Ranger mobile app
  * (ranger-app-b7637). Config mirrors ranger-app/src/firebase/firebaseConfig.js.
  *
- * The web dashboard uses the Firebase JS SDK directly — no polyfills needed
+ * The web dashboard uses the Firebase JS SDK directly ΓÇö no polyfills needed
  * (unlike Expo Go which needed the REST workaround).
  *
  * Firestore rules: open test mode until 2026-10-29 (no auth required).

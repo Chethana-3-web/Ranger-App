@@ -1,4 +1,4 @@
-
+﻿
 const SEV_STYLE = {
   Critical: { bg: '#dc2626', text: '#fff' },
   High:     { bg: '#fee2e2', text: '#991b1b' },
@@ -7,7 +7,7 @@ const SEV_STYLE = {
   Unknown:  { bg: '#f3f4f6', text: '#4b5563' },
 };
 
-/** SeverityChip – coloured badge for an incident severity. */
+/** SeverityChip ΓÇô coloured badge for an incident severity. */
 export default function SeverityChip({ severity }) {
   const sev = SEV_STYLE[severity] ?? SEV_STYLE.Unknown;
   return (

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import L from 'leaflet';
@@ -23,7 +23,7 @@ const markerIcon = L.divIcon({
 });
 
 function formatDateTime(iso) {
-  if (!iso) return '—';
+  if (!iso) return 'ΓÇö';
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? iso : date.toLocaleString();
 }
@@ -35,7 +35,7 @@ function getPhotoUrl(incident) {
 }
 
 /**
- * IncidentDetails – one incident with its evidence, location, workflow
+ * IncidentDetails ΓÇô one incident with its evidence, location, workflow
  * status and ranger assignment.
  */
 export default function IncidentDetails() {
@@ -48,13 +48,13 @@ export default function IncidentDetails() {
   const incident = incidents.find((i) => i.id === id);
 
   if (loading) {
-    return <div style={styles.center}>Loading incident…</div>;
+    return <div style={styles.center}>Loading incidentΓÇª</div>;
   }
 
   if (!incident) {
     return (
       <div style={styles.center}>
-        <p>No incident found with ID “{id}”.</p>
+        <p>No incident found with ID ΓÇ£{id}ΓÇ¥.</p>
         <Link to="/incidents" className="btn btn-secondary">Back to incidents</Link>
       </div>
     );
@@ -133,9 +133,9 @@ export default function IncidentDetails() {
             <h3 style={styles.cardTitle}>Details</h3>
             <dl style={styles.fields}>
               <Field label="Incident type" value={incident.label ?? incident.type} />
-              <Field label="Park" value={park?.name ?? incident.parkId ?? '—'} />
+              <Field label="Park" value={park?.name ?? incident.parkId ?? 'ΓÇö'} />
               <Field label="Date / time" value={formatDateTime(incident.reportedAt)} />
-              <Field label="Reporter" value={reporter ? `${reporter.name} (${reporter.id})` : incident.reportedBy ?? '—'} />
+              <Field label="Reporter" value={reporter ? `${reporter.name} (${reporter.id})` : incident.reportedBy ?? 'ΓÇö'} />
               <Field label="Assigned ranger" value={assigned?.name ?? incident.assignedRangerId ?? 'Not assigned'} />
               <Field
                 label="GPS location"
@@ -155,7 +155,7 @@ export default function IncidentDetails() {
                 <ImageOff size={28} color="#9ca3af" />
                 <span>
                   {incident.photoUri
-                    ? 'The photo is stored on the ranger’s device and has not been uploaded.'
+                    ? 'The photo is stored on the rangerΓÇÖs device and has not been uploaded.'
                     : 'No photo was attached to this incident.'}
                 </span>
               </div>
@@ -228,7 +228,7 @@ export default function IncidentDetails() {
                 )}
               </label>
             </div>
-            {saving && <div style={styles.saving}>Saving…</div>}
+            {saving && <div style={styles.saving}>SavingΓÇª</div>}
           </section>
 
           <section style={styles.card}>

@@ -1,5 +1,5 @@
-/**
- * Analytics — Full system analytics across all data sources.
+﻿/**
+ * Analytics ΓÇö Full system analytics across all data sources.
  * Data: collar_alerts, incidents, animal_profiles, rangers, patrols, community_reports
  * Includes professional PDF report generation.
  */
@@ -11,12 +11,12 @@ import { subscribeToIncidents, subscribeToCommunityReports } from '../services/i
 import { subscribeToAnimals } from '../services/animalService.js';
 import { RANGERS, PATROL_ROUTES } from '../data/mockData.js';
 
-// ── PDF generation ────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ PDF generation ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 async function generatePDFReport(data) {
   const { default: jsPDF } = await import('jspdf');
   const autoTableModule = await import('jspdf-autotable');
-  // jspdf-autotable patches jsPDF prototype — just import it as side effect
+  // jspdf-autotable patches jsPDF prototype ΓÇö just import it as side effect
   const autoTable = autoTableModule.default ?? autoTableModule.applyPlugin ?? null;
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -27,7 +27,7 @@ async function generatePDFReport(data) {
   const light  = [240, 245, 240];
   const now    = new Date().toLocaleString();
 
-  // ── Cover header ────────────────────────────────────────────────────────────
+  // ΓöÇΓöÇ Cover header ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   doc.setFillColor(...green);
   doc.rect(0, 0, W, 42, 'F');
   doc.setFillColor(46, 125, 50);
@@ -39,11 +39,11 @@ async function generatePDFReport(data) {
   doc.setFontSize(13); doc.setFont('helvetica', 'normal');
   doc.text('Operational Analytics & Performance Report', margin, 25);
   doc.setFontSize(9);
-  doc.text(`Sri Lanka Department of Wildlife Conservation  ·  Generated: ${now}`, margin, 34);
+  doc.text(`Sri Lanka Department of Wildlife Conservation  ┬╖  Generated: ${now}`, margin, 34);
 
   let y = 52;
 
-  // ── KPI summary row ────────────────────────────────────────────────────────
+  // ΓöÇΓöÇ KPI summary row ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   const kpis = [
     { label: 'Patrol Incidents', value: data.incidents.total },
     { label: 'Collar Alerts',    value: data.alerts.total },
@@ -71,7 +71,7 @@ async function generatePDFReport(data) {
 
   y += 50;
 
-  // ── Section helper ─────────────────────────────────────────────────────────
+  // ΓöÇΓöÇ Section helper ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   const section = (title) => {
     if (y > 260) { doc.addPage(); y = 20; }
     doc.setFillColor(...green);
@@ -95,13 +95,13 @@ async function generatePDFReport(data) {
     y = doc.lastAutoTable.finalY + 6;
   };
 
-  // ── 1. Patrol Incidents ────────────────────────────────────────────────────
+  // ΓöÇΓöÇ 1. Patrol Incidents ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   section('1. Patrol Incidents');
   tbl(
     ['Type', 'Park', 'Status', 'Reported At'],
     data.incidents.list.slice(0, 20).map((i) => [
-      i.label ?? i.type, i.parkId ?? '—', i.status ?? '—',
-      i.recordedAt ? new Date(i.recordedAt).toLocaleDateString() : '—',
+      i.label ?? i.type, i.parkId ?? 'ΓÇö', i.status ?? 'ΓÇö',
+      i.recordedAt ? new Date(i.recordedAt).toLocaleDateString() : 'ΓÇö',
     ])
   );
 
@@ -117,9 +117,9 @@ async function generatePDFReport(data) {
   tbl(
     ['Type', 'Animal', 'Risk Level', 'Status', 'Zone', 'Date'],
     data.alerts.list.slice(0, 20).map((a) => [
-      a.type, a.animalName ?? '—', a.riskLevel, a.status,
-      a.riskZone ?? '—',
-      a.generatedAt ? new Date(a.generatedAt).toLocaleDateString() : '—',
+      a.type, a.animalName ?? 'ΓÇö', a.riskLevel, a.status,
+      a.riskZone ?? 'ΓÇö',
+      a.generatedAt ? new Date(a.generatedAt).toLocaleDateString() : 'ΓÇö',
     ])
   );
 
@@ -128,7 +128,7 @@ async function generatePDFReport(data) {
     ['Risk Level', 'Count', 'Resolved', 'Resolution Rate'],
     data.alerts.byRisk.map((r) => [
       r.label, r.value, r.resolved,
-      r.value > 0 ? `${Math.round((r.resolved / r.value) * 100)}%` : '—',
+      r.value > 0 ? `${Math.round((r.resolved / r.value) * 100)}%` : 'ΓÇö',
     ])
   );
 
@@ -136,9 +136,9 @@ async function generatePDFReport(data) {
   tbl(
     ['Type', 'Status', 'Location', 'Date'],
     data.community.list.slice(0, 15).map((r) => [
-      r.label ?? r.type ?? '—', r.status ?? '—',
-      `${r.latitude?.toFixed(3) ?? '—'}, ${r.longitude?.toFixed(3) ?? '—'}`,
-      r.recordedAt ? new Date(r.recordedAt).toLocaleDateString() : '—',
+      r.label ?? r.type ?? 'ΓÇö', r.status ?? 'ΓÇö',
+      `${r.latitude?.toFixed(3) ?? 'ΓÇö'}, ${r.longitude?.toFixed(3) ?? 'ΓÇö'}`,
+      r.recordedAt ? new Date(r.recordedAt).toLocaleDateString() : 'ΓÇö',
     ])
   );
 
@@ -147,7 +147,7 @@ async function generatePDFReport(data) {
     ['Ranger', 'Park', 'Status', 'Patrol Route', 'Sync', 'Battery'],
     data.rangers.list.map((r) => [
       r.name, r.parkId, r.status, r.patrolRouteId ?? 'None',
-      r.syncStatus, `${r.battery ?? '—'}%`,
+      r.syncStatus, `${r.battery ?? 'ΓÇö'}%`,
     ])
   );
 
@@ -155,12 +155,12 @@ async function generatePDFReport(data) {
   tbl(
     ['Animal ID', 'Name', 'Species', 'Collar ID', 'Park', 'Status', 'Zone'],
     data.animals.list.map((a) => [
-      a.id, a.name, a.species, a.collarId ?? '—',
-      a.parkId, a.status, a.zone ?? '—',
+      a.id, a.name, a.species, a.collarId ?? 'ΓÇö',
+      a.parkId, a.status, a.zone ?? 'ΓÇö',
     ])
   );
 
-  // ── Footer on all pages ───────────────────────────────────────────────────
+  // ΓöÇΓöÇ Footer on all pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
@@ -168,14 +168,14 @@ async function generatePDFReport(data) {
     doc.rect(0, 287, W, 10, 'F');
     doc.setTextColor(...gray);
     doc.setFontSize(7); doc.setFont('helvetica', 'normal');
-    doc.text('Sri Lanka Department of Wildlife Conservation — Confidential', margin, 293);
+    doc.text('Sri Lanka Department of Wildlife Conservation ΓÇö Confidential', margin, 293);
     doc.text(`Page ${i} of ${pageCount}`, W - margin, 293, { align: 'right' });
   }
 
   doc.save(`WildWatch_Analytics_Report_${new Date().toISOString().slice(0,10)}.pdf`);
 }
 
-// ── Chart components ──────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Chart components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 function BarChart({ data, color = '#1B5E20', height = 140 }) {
   const max = Math.max(...data.map((d) => d.value), 1);
@@ -222,7 +222,7 @@ function KPICard({ label, value, sub, color, icon: Icon }) {
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Main page ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 export default function Analytics() {
   const [alerts,    setAlerts]    = useState([]);
@@ -244,7 +244,7 @@ export default function Analytics() {
     return () => { u1(); u2(); u3(); u4(); };
   }, []);
 
-  // ── Derived stats ──────────────────────────────────────────────────────────
+  // ΓöÇΓöÇ Derived stats ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
   const stats = useMemo(() => {
     // Alerts
@@ -270,7 +270,7 @@ export default function Analytics() {
     const incTotal = incidents.length;
     const incByType = Object.entries(
       incidents.reduce((acc, i) => { const k = i.label ?? i.type ?? 'Other'; acc[k] = (acc[k] ?? 0) + 1; return acc; }, {})
-    ).map(([label, value]) => ({ label: label.length > 12 ? label.slice(0,12)+'…' : label, value })).sort((a,b) => b.value - a.value);
+    ).map(([label, value]) => ({ label: label.length > 12 ? label.slice(0,12)+'ΓÇª' : label, value })).sort((a,b) => b.value - a.value);
 
     const incByPark = Object.entries(
       incidents.reduce((acc, i) => { acc[i.parkId ?? 'Unknown'] = (acc[i.parkId ?? 'Unknown'] ?? 0) + 1; return acc; }, {})
@@ -326,7 +326,7 @@ export default function Analytics() {
   if (loading) return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#6b7280', flexDirection: 'column', gap: 12 }}>
       <BarChart2 size={32} color="#1B5E20" />
-      <p>Loading analytics…</p>
+      <p>Loading analyticsΓÇª</p>
     </div>
   );
 
@@ -339,15 +339,15 @@ export default function Analytics() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
         <div>
           <h1 style={{ margin: '0 0 4px', fontSize: 22, color: '#1B5E20' }}>System Analytics</h1>
-          <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>Live data across all system modules — incidents, alerts, rangers, animals, community reports</p>
+          <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>Live data across all system modules ΓÇö incidents, alerts, rangers, animals, community reports</p>
         </div>
         <button onClick={handleDownloadPDF} disabled={generating}
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', background: generating ? '#6b7280' : '#1B5E20', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: generating ? 'not-allowed' : 'pointer' }}>
-          <Download size={16} />{generating ? 'Generating PDF…' : 'Download Report (PDF)'}
+          <Download size={16} />{generating ? 'Generating PDFΓÇª' : 'Download Report (PDF)'}
         </button>
       </div>
 
-      {/* ── KPI Grid ── */}
+      {/* ΓöÇΓöÇ KPI Grid ΓöÇΓöÇ */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>
         <KPICard label="Patrol Incidents"   value={stats.incidents.total} color="#1B5E20" icon={Shield}       sub="Logged by rangers" />
         <KPICard label="Collar Alerts"      value={stats.alerts.total}    color="#dc2626" icon={AlertTriangle} sub={`${stats.alerts.active} active`} />
@@ -359,7 +359,7 @@ export default function Analytics() {
         <KPICard label="Critical Alerts"    value={stats.alerts.critical} color="#b91c1c" icon={AlertTriangle} sub="Immediate response needed" />
       </div>
 
-      {/* ── Row 1: Incidents + Alerts by risk ── */}
+      {/* ΓöÇΓöÇ Row 1: Incidents + Alerts by risk ΓöÇΓöÇ */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
         <div style={{ background: '#fff', borderRadius: 10, padding: 16, border: '1px solid #e5e7eb' }}>
           <h3 style={{ margin: '0 0 4px', fontSize: 14 }}>Patrol Incidents by Type</h3>
@@ -375,7 +375,7 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* ── Row 2: Park distribution ── */}
+      {/* ΓöÇΓöÇ Row 2: Park distribution ΓöÇΓöÇ */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>
         <div style={{ background: '#fff', borderRadius: 10, padding: 16, border: '1px solid #e5e7eb' }}>
           <h3 style={{ margin: '0 0 12px', fontSize: 14 }}>Incidents by Park</h3>
@@ -391,7 +391,7 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* ── Row 3: Status breakdowns ── */}
+      {/* ΓöÇΓöÇ Row 3: Status breakdowns ΓöÇΓöÇ */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
         <div style={{ background: '#fff', borderRadius: 10, padding: 16, border: '1px solid #e5e7eb' }}>
           <h3 style={{ margin: '0 0 4px', fontSize: 14 }}>Alert Status Breakdown</h3>
@@ -412,7 +412,7 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* ── Row 4: Ranger operations ── */}
+      {/* ΓöÇΓöÇ Row 4: Ranger operations ΓöÇΓöÇ */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
         <div style={{ background: '#fff', borderRadius: 10, padding: 16, border: '1px solid #e5e7eb' }}>
           <h3 style={{ margin: '0 0 4px', fontSize: 14 }}>Ranger Deployment Status</h3>
@@ -444,7 +444,7 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* ── Row 5: Incident severity ── */}
+      {/* ΓöÇΓöÇ Row 5: Incident severity ΓöÇΓöÇ */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 16, border: '1px solid #e5e7eb', marginBottom: 16 }}>
         <h3 style={{ margin: '0 0 4px', fontSize: 14 }}>Incident Severity Distribution</h3>
         <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6b7280' }}>Breakdown of all patrol incidents by severity level</p>

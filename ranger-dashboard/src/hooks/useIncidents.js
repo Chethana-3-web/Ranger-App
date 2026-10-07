@@ -1,5 +1,5 @@
-/**
- * useIncidents — incidents with the manager workflow merged in.
+﻿/**
+ * useIncidents ΓÇö incidents with the manager workflow merged in.
  *
  * Returns { incidents, loading, error, source }.
  *

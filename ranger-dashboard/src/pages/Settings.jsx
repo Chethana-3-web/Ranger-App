@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Save, Bell, Shield, User, Map, Smartphone } from 'lucide-react';
 
 export default function Settings() {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { subscribeToCommunityReports } from '../services/incidentService.js';
 import { db } from '../services/firebase.js'; // Ensure correct import
 import { doc, updateDoc } from 'firebase/firestore';
@@ -226,7 +226,7 @@ export default function CommunityReports() {
 
               {relatedReports.length > 0 && (
                 <div style={styles.hotspotBox}>
-                  <h4 style={styles.hotspotHeader}>🚨 POSSIBLE RELATED REPORTS (HOTSPOT)</h4>
+                  <h4 style={styles.hotspotHeader}>≡ƒÜ¿ POSSIBLE RELATED REPORTS (HOTSPOT)</h4>
                   <p>Found {relatedReports.length} similar {selectedReport.label} report(s) within 5km and 48 hours.</p>
                   <ul>
                     {relatedReports.map(rr => (

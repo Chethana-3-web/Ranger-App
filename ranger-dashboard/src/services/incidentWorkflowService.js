@@ -1,5 +1,5 @@
-/**
- * incidentWorkflowService.js — Manager workflow for incidents.
+﻿/**
+ * incidentWorkflowService.js ΓÇö Manager workflow for incidents.
  *
  * The mobile app uploads each incident with a PATCH that replaces the whole
  * 'incidents' document, and its `status` field holds the sync state. So the
@@ -26,7 +26,7 @@ export const SEVERITIES = ['Low', 'Medium', 'High', 'Critical'];
  * Calls `callback` with a map keyed by incident id, then on every change.
  *
  * @param {(result: { data: object, error: string | null }) => void} callback
- * @returns {() => void} unsubscribe function — call on component unmount
+ * @returns {() => void} unsubscribe function ΓÇö call on component unmount
  */
 export function subscribeToIncidentWorkflow(callback) {
   return onSnapshot(
@@ -67,7 +67,7 @@ export function updateIncidentWorkflow(incidentId, changes, note) {
 
 /**
  * Merge a workflow record over an incident.
- * Order: workflow record → values already on the incident (mock data) → defaults.
+ * Order: workflow record ΓåÆ values already on the incident (mock data) ΓåÆ defaults.
  *
  * @param {object} incident
  * @param {object} [workflow]

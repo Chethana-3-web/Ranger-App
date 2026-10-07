@@ -1,5 +1,5 @@
-/**
- * useRangers — live list of verified rangers registered in the mobile app.
+﻿/**
+ * useRangers ΓÇö live list of verified rangers registered in the mobile app.
  *
  * Returns { rangers, loading, error }, where each ranger is { id, name }.
  *

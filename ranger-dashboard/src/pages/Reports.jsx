@@ -1,5 +1,5 @@
-/**
- * Reports — Member 4 dashboard page.
+﻿/**
+ * Reports ΓÇö Member 4 dashboard page.
  * Three downloadable report types:
  * 1. Patrol Incident Report
  * 2. Wildlife Alert Report
@@ -12,7 +12,7 @@ import { subscribeToCollarAlerts } from '../services/alertService.js';
 import { subscribeToIncidents } from '../services/incidentService.js';
 import { RANGERS, PATROL_ROUTES, PARKS } from '../data/mockData.js';
 
-// ── PDF helpers ───────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ PDF helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 async function makePDF() {
   const { default: jsPDF } = await import('jspdf');
@@ -28,11 +28,11 @@ function pdfHeader(doc, title, subtitle) {
   doc.rect(0, 34, W, 4, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
-  doc.text('WildWatch — Sri Lanka DWC', m, 14);
+  doc.text('WildWatch ΓÇö Sri Lanka DWC', m, 14);
   doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
   doc.text(title, m, 23);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
-  doc.text(`${subtitle}  ·  Generated: ${new Date().toLocaleString()}`, m, 31);
+  doc.text(`${subtitle}  ┬╖  Generated: ${new Date().toLocaleString()}`, m, 31);
   doc.setTextColor(30, 30, 30);
   return 46;
 }
@@ -56,12 +56,12 @@ function pdfFooter(doc) {
     doc.setFillColor(240, 245, 240);
     doc.rect(0, 287, 210, 10, 'F');
     doc.setTextColor(120, 120, 120); doc.setFontSize(7);
-    doc.text('Sri Lanka Department of Wildlife Conservation — Confidential', 14, 293);
+    doc.text('Sri Lanka Department of Wildlife Conservation ΓÇö Confidential', 14, 293);
     doc.text(`Page ${i} of ${n}`, 196, 293, { align: 'right' });
   }
 }
 
-// ── Report 1: Patrol Incidents ─────────────────────────────────────────────
+// ΓöÇΓöÇ Report 1: Patrol Incidents ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 async function downloadIncidentReport(incidents, filters) {
   const filtered = incidents.filter((i) => {
@@ -71,7 +71,7 @@ async function downloadIncidentReport(incidents, filters) {
   });
 
   const doc = await makePDF();
-  let y = pdfHeader(doc, 'Patrol Incident Report', `${filtered.length} incidents · Park: ${filters.park || 'All'} · Type: ${filters.type || 'All'}`);
+  let y = pdfHeader(doc, 'Patrol Incident Report', `${filtered.length} incidents ┬╖ Park: ${filters.park || 'All'} ┬╖ Type: ${filters.type || 'All'}`);
 
   // Summary box
   doc.setFillColor(240, 248, 240);
@@ -88,13 +88,13 @@ async function downloadIncidentReport(incidents, filters) {
   y = pdfTable(doc,
     ['Date', 'Ranger ID', 'Park', 'Type', 'Severity', 'GPS Source', 'Status'],
     filtered.map((i) => [
-      i.recordedAt ? new Date(i.recordedAt).toLocaleDateString() : '—',
-      i.rangerId ?? '—',
-      i.parkId ?? '—',
-      i.label ?? i.type ?? '—',
-      i.severity ?? '—',
-      i.location?.source ?? '—',
-      i.status ?? '—',
+      i.recordedAt ? new Date(i.recordedAt).toLocaleDateString() : 'ΓÇö',
+      i.rangerId ?? 'ΓÇö',
+      i.parkId ?? 'ΓÇö',
+      i.label ?? i.type ?? 'ΓÇö',
+      i.severity ?? 'ΓÇö',
+      i.location?.source ?? 'ΓÇö',
+      i.status ?? 'ΓÇö',
     ]), y
   );
 
@@ -102,7 +102,7 @@ async function downloadIncidentReport(incidents, filters) {
   doc.save(`Incident_Report_${new Date().toISOString().slice(0,10)}.pdf`);
 }
 
-// ── Report 2: Wildlife Alert Report ───────────────────────────────────────
+// ΓöÇΓöÇ Report 2: Wildlife Alert Report ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 async function downloadAlertReport(alerts, filters) {
   const filtered = alerts.filter((a) => {
@@ -113,7 +113,7 @@ async function downloadAlertReport(alerts, filters) {
   });
 
   const doc = await makePDF();
-  let y = pdfHeader(doc, 'Wildlife Collar Alert Report', `${filtered.length} alerts · Risk: ${filters.risk || 'All'} · Status: ${filters.status || 'All'}`);
+  let y = pdfHeader(doc, 'Wildlife Collar Alert Report', `${filtered.length} alerts ┬╖ Risk: ${filters.risk || 'All'} ┬╖ Status: ${filters.status || 'All'}`);
 
   // KPI row
   const resolved   = filtered.filter((a) => a.status === 'Resolved').length;
@@ -133,12 +133,12 @@ async function downloadAlertReport(alerts, filters) {
   y = pdfTable(doc,
     ['Date', 'Animal', 'Species', 'Risk Zone', 'Risk Level', 'Status', 'Acknowledged By'],
     filtered.map((a) => [
-      a.generatedAt ? new Date(a.generatedAt).toLocaleDateString() : '—',
-      a.animalName ?? '—',
-      a.species ?? '—',
-      a.riskZone ?? '—',
-      a.riskLevel ?? '—',
-      a.status ?? '—',
+      a.generatedAt ? new Date(a.generatedAt).toLocaleDateString() : 'ΓÇö',
+      a.animalName ?? 'ΓÇö',
+      a.species ?? 'ΓÇö',
+      a.riskZone ?? 'ΓÇö',
+      a.riskLevel ?? 'ΓÇö',
+      a.status ?? 'ΓÇö',
       a.acknowledgedBy ?? 'Not acknowledged',
     ]), y
   );
@@ -147,7 +147,7 @@ async function downloadAlertReport(alerts, filters) {
   doc.save(`Alert_Report_${new Date().toISOString().slice(0,10)}.pdf`);
 }
 
-// ── Report 3: Operational Summary ─────────────────────────────────────────
+// ΓöÇΓöÇ Report 3: Operational Summary ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 async function downloadSummaryReport(incidents, alerts) {
   const doc = await makePDF();
@@ -201,7 +201,7 @@ async function downloadSummaryReport(incidents, alerts) {
   row('Monitoring',             alerts.filter(a => a.status?.includes('Monitoring')).length);
   row('Critical Risk',          alerts.filter(a => a.riskLevel === 'Critical').length);
   row('High Risk',              alerts.filter(a => a.riskLevel === 'High').length);
-  row('Resolution Rate',        alerts.length > 0 ? Math.round((alerts.filter(a => a.status==='Resolved').length / alerts.length) * 100) + '%' : '—');
+  row('Resolution Rate',        alerts.length > 0 ? Math.round((alerts.filter(a => a.status==='Resolved').length / alerts.length) * 100) + '%' : 'ΓÇö');
   y += 4;
 
   // Parks
@@ -210,17 +210,17 @@ async function downloadSummaryReport(incidents, alerts) {
     const pInc   = incidents.filter(i => i.parkId === p.id).length;
     const pAlert = alerts.filter(a => a.parkId === p.id).length;
     const pRng   = RANGERS.filter(r => r.parkId === p.id).length;
-    row(p.name, `${pRng} rangers`, `${pInc} incidents · ${pAlert} alerts`);
+    row(p.name, `${pRng} rangers`, `${pInc} incidents ┬╖ ${pAlert} alerts`);
   });
 
   pdfFooter(doc);
   doc.save(`Operational_Summary_${new Date().toISOString().slice(0,10)}.pdf`);
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Main page ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 const REPORT_TYPES = [
-  { id: 'incidents', label: 'Patrol Incident Report',      icon: Shield,        color: '#1B5E20', desc: 'All incidents logged by rangers — types, severity, location, sync status.' },
+  { id: 'incidents', label: 'Patrol Incident Report',      icon: Shield,        color: '#1B5E20', desc: 'All incidents logged by rangers ΓÇö types, severity, location, sync status.' },
   { id: 'alerts',    label: 'Wildlife Alert Report',       icon: AlertTriangle, color: '#dc2626', desc: 'All collar alerts with risk level, zone, status and ranger acknowledgement.' },
   { id: 'summary',   label: 'Operational Summary Report',  icon: BarChart2,     color: '#2563eb', desc: 'One-page overview of rangers, patrols, incidents and alerts for management.' },
 ];
@@ -284,7 +284,7 @@ export default function Reports() {
         </div>
         <button onClick={handleDownload} disabled={generating || loading}
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', background: generating ? '#6b7280' : '#1B5E20', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: generating ? 'not-allowed' : 'pointer' }}>
-          <Download size={16} /> {generating ? 'Generating PDF…' : 'Download PDF'}
+          <Download size={16} /> {generating ? 'Generating PDFΓÇª' : 'Download PDF'}
         </button>
       </div>
 
@@ -346,11 +346,11 @@ export default function Reports() {
         <div style={{ padding: '12px 16px', borderBottom: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', gap: 8 }}>
           <Eye size={15} color="#6b7280" />
           <span style={{ fontSize: 13, fontWeight: 600 }}>Preview</span>
-          <span style={{ fontSize: 12, color: '#9ca3af' }}>— first 20 rows shown</span>
+          <span style={{ fontSize: 12, color: '#9ca3af' }}>ΓÇö first 20 rows shown</span>
         </div>
         <div style={{ overflowX: 'auto' }}>
           {loading ? (
-            <p style={{ padding: 20, color: '#9ca3af' }}>Loading data…</p>
+            <p style={{ padding: 20, color: '#9ca3af' }}>Loading dataΓÇª</p>
           ) : active === 'incidents' ? (
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead><tr style={{ background: '#f9fafb' }}>
@@ -361,14 +361,14 @@ export default function Reports() {
               <tbody>
                 {filteredInc.slice(0,20).map((i, idx) => (
                   <tr key={idx} style={{ borderBottom: '1px solid #f3f4f6', background: idx%2===0?'#fff':'#fafafa' }}>
-                    <td style={{ padding: '8px 12px' }}>{i.recordedAt ? new Date(i.recordedAt).toLocaleDateString() : '—'}</td>
-                    <td style={{ padding: '8px 12px', color: '#6b7280' }}>{i.rangerId ?? '—'}</td>
-                    <td style={{ padding: '8px 12px', color: '#6b7280' }}>{i.parkId ?? '—'}</td>
-                    <td style={{ padding: '8px 12px', fontWeight: 500 }}>{i.label ?? i.type ?? '—'}</td>
+                    <td style={{ padding: '8px 12px' }}>{i.recordedAt ? new Date(i.recordedAt).toLocaleDateString() : 'ΓÇö'}</td>
+                    <td style={{ padding: '8px 12px', color: '#6b7280' }}>{i.rangerId ?? 'ΓÇö'}</td>
+                    <td style={{ padding: '8px 12px', color: '#6b7280' }}>{i.parkId ?? 'ΓÇö'}</td>
+                    <td style={{ padding: '8px 12px', fontWeight: 500 }}>{i.label ?? i.type ?? 'ΓÇö'}</td>
                     <td style={{ padding: '8px 12px' }}>
-                      <span style={{ fontWeight: 700, fontSize: 11, padding: '2px 7px', borderRadius: 4, background: ({Critical:'#fef2f2',High:'#fff7ed',Medium:'#fffbeb',Low:'#f0fdf4'}[i.severity]??'#f9fafb'), color: ({Critical:'#dc2626',High:'#ea580c',Medium:'#d97706',Low:'#16a34a'}[i.severity]??'#374151') }}>{i.severity??'—'}</span>
+                      <span style={{ fontWeight: 700, fontSize: 11, padding: '2px 7px', borderRadius: 4, background: ({Critical:'#fef2f2',High:'#fff7ed',Medium:'#fffbeb',Low:'#f0fdf4'}[i.severity]??'#f9fafb'), color: ({Critical:'#dc2626',High:'#ea580c',Medium:'#d97706',Low:'#16a34a'}[i.severity]??'#374151') }}>{i.severity??'ΓÇö'}</span>
                     </td>
-                    <td style={{ padding: '8px 12px', color: '#6b7280' }}>{i.status ?? '—'}</td>
+                    <td style={{ padding: '8px 12px', color: '#6b7280' }}>{i.status ?? 'ΓÇö'}</td>
                   </tr>
                 ))}
                 {filteredInc.length === 0 && <tr><td colSpan={6} style={{ padding: 24, textAlign: 'center', color: '#9ca3af' }}>No incidents match the filters</td></tr>}
@@ -384,10 +384,10 @@ export default function Reports() {
               <tbody>
                 {filteredAlerts.slice(0,20).map((a, idx) => (
                   <tr key={idx} style={{ borderBottom: '1px solid #f3f4f6', background: idx%2===0?'#fff':'#fafafa' }}>
-                    <td style={{ padding: '8px 12px' }}>{a.generatedAt ? new Date(a.generatedAt).toLocaleDateString() : '—'}</td>
-                    <td style={{ padding: '8px 12px', fontWeight: 500 }}>{a.animalName ?? '—'}</td>
-                    <td style={{ padding: '8px 12px', color: '#6b7280' }}>{a.species ?? '—'}</td>
-                    <td style={{ padding: '8px 12px', color: '#6b7280' }}>{a.riskZone ?? '—'}</td>
+                    <td style={{ padding: '8px 12px' }}>{a.generatedAt ? new Date(a.generatedAt).toLocaleDateString() : 'ΓÇö'}</td>
+                    <td style={{ padding: '8px 12px', fontWeight: 500 }}>{a.animalName ?? 'ΓÇö'}</td>
+                    <td style={{ padding: '8px 12px', color: '#6b7280' }}>{a.species ?? 'ΓÇö'}</td>
+                    <td style={{ padding: '8px 12px', color: '#6b7280' }}>{a.riskZone ?? 'ΓÇö'}</td>
                     <td style={{ padding: '8px 12px' }}>
                       <span style={{ fontWeight: 700, fontSize: 11, padding: '2px 7px', borderRadius: 4, color: ({Critical:'#dc2626',High:'#ea580c',Medium:'#d97706',Low:'#16a34a'}[a.riskLevel]??'#374151'), background: ({Critical:'#fef2f2',High:'#fff7ed',Medium:'#fffbeb',Low:'#f0fdf4'}[a.riskLevel]??'#f9fafb') }}>{a.riskLevel}</span>
                     </td>
@@ -410,7 +410,7 @@ export default function Reports() {
                 { label: 'Alerts Resolved',     value: alerts.filter(a=>a.status==='Resolved').length },
                 { label: 'Critical Incidents',  value: incidents.filter(i=>i.severity==='Critical').length },
                 { label: 'Critical Alerts',     value: alerts.filter(a=>a.riskLevel==='Critical').length },
-                { label: 'Resolution Rate',     value: alerts.length>0 ? Math.round(alerts.filter(a=>a.status==='Resolved').length/alerts.length*100)+'%' : '—' },
+                { label: 'Resolution Rate',     value: alerts.length>0 ? Math.round(alerts.filter(a=>a.status==='Resolved').length/alerts.length*100)+'%' : 'ΓÇö' },
               ].map(({ label, value }) => (
                 <div key={label} style={{ background: '#f9fafb', borderRadius: 8, padding: '12px 14px', border: '1px solid #e5e7eb' }}>
                   <div style={{ fontSize: 22, fontWeight: 800, color: '#1B5E20' }}>{value}</div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Map, AlertTriangle, Users,
@@ -61,7 +61,7 @@ export default function Sidebar() {
           </span>
         </nav>
 
-        <div className="sidebar-footer">SE3070 · Sri Lanka DWC</div>
+        <div className="sidebar-footer">SE3070 ┬╖ Sri Lanka DWC</div>
       </aside>
 
       {/* Logout Confirmation Modal Overlay */}

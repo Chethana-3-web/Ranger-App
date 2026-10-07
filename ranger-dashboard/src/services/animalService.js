@@ -1,6 +1,6 @@
-/**
- * animalService.js — Firestore CRUD for animal_profiles collection.
- * Images stored as base64 in Firestore — no Firebase Storage needed.
+﻿/**
+ * animalService.js ΓÇö Firestore CRUD for animal_profiles collection.
+ * Images stored as base64 in Firestore ΓÇö no Firebase Storage needed.
  */
 
 import {
@@ -47,7 +47,7 @@ export async function deleteAnimal(id) {
 
 /**
  * Compress image and store as base64 in Firestore.
- * Resizes to max 400px and compresses to ~50KB — well under Firestore 1MB limit.
+ * Resizes to max 400px and compresses to ~50KB ΓÇö well under Firestore 1MB limit.
  */
 export async function uploadAnimalPhoto(animalId, file) {
   const base64 = await compressImage(file, 400, 0.5);

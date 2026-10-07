@@ -1,9 +1,9 @@
-import { Check } from 'lucide-react';
+﻿import { Check } from 'lucide-react';
 import { WORKFLOW_STEPS } from '../../services/incidentWorkflowService.js';
 
 /**
- * WorkflowTracker – shows the incident workflow as a row of steps:
- * New → Under Review → Assigned → Responding → Resolved.
+ * WorkflowTracker ΓÇô shows the incident workflow as a row of steps:
+ * New ΓåÆ Under Review ΓåÆ Assigned ΓåÆ Responding ΓåÆ Resolved.
  *
  * @param {{ status: string }} props
  */
