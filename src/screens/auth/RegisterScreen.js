@@ -43,6 +43,7 @@ export default function RegisterScreen({ navigation }) {
 
   const [role, setRole] = useState('community'); // 'community' or 'officer'
   const [idPhotoUri, setIdPhotoUri] = useState(null);
+  const [parkName, setParkName] = useState('');
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -75,6 +76,11 @@ export default function RegisterScreen({ navigation }) {
       valid = false;
     }
 
+    if (role === 'park_manager' && !parkName.trim()) {
+      newErrors.park = 'Park name is required.';
+      valid = false;
+    }
+
     if (!isPasswordValid) {
       newErrors.password = 'Password does not meet the requirements.';
       valid = false;
@@ -91,12 +97,18 @@ export default function RegisterScreen({ navigation }) {
     
     setLocalLoading(true);
     try {
-      await register({ fullName, email, phone, district, address, password, role, idPhotoUri });
+      await register({ fullName, email, phone, district, address, password, role, idPhotoUri, ...(role === 'park_manager' ? { parkName: parkName.trim() } : {}) });
       if (role === 'officer') {
         Alert.alert(
           "Registration Submitted",
           "Your Ranger Officer account is pending verification by the admin. You will be able to log in once verified.",
           [{ text: "OK", onPress: () => navigation.navigate('Login') }]
+        );
+      } else if (role === 'park_manager') {
+        Alert.alert(
+          "Account Created",
+          "Your Park Manager account has been created. You can now log in to review camera trap images.",
+          [{ text: "Continue to Login", onPress: () => navigation.navigate('Login') }]
         );
       } else {
         Alert.alert(
@@ -189,6 +201,17 @@ export default function RegisterScreen({ navigation }) {
                 <Text style={[styles.roleButtonText, role === 'officer' && styles.roleButtonTextActive]}>Ranger</Text>
               </TouchableOpacity>
             </View>
+            <View style={{ flexDirection: 'row', marginBottom: 16 }}>
+              <TouchableOpacity
+                style={[styles.roleButton, role === 'park_manager' && styles.roleButtonActive]}
+                onPress={() => setRole('park_manager')}
+              >
+                <Ionicons name="leaf" size={20} color={role === 'park_manager' ? theme.colors.surface : theme.colors.primary} />
+                <Text style={[styles.roleButtonText, role === 'park_manager' && styles.roleButtonTextActive]}>Park Manager</Text>
+              </TouchableOpacity>
+              <View style={{ width: 10 }} />
+              <View style={{ flex: 1 }} />
+            </View>
 
             {role === 'officer' && (
               <View style={{ marginBottom: 16 }}>
@@ -205,6 +228,18 @@ export default function RegisterScreen({ navigation }) {
                 </TouchableOpacity>
                 {errors.idPhoto ? <Text style={styles.errorText}>{errors.idPhoto}</Text> : null}
                 <View style={styles.spacer} />
+              </View>
+            )}
+
+            {role === 'park_manager' && (
+              <View style={{ marginBottom: 16 }}>
+                <TextField
+                  label="Park Name *"
+                  placeholder="Enter the park you manage"
+                  value={parkName}
+                  onChangeText={(text) => { setParkName(text); setErrors(e => ({...e, park: null})); }}
+                  error={errors.park}
+                />
               </View>
             )}
 

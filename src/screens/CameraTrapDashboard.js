@@ -13,6 +13,7 @@ import { ScreenContainer } from '../core/ui/ScreenContainer';
 import { useAuth } from '../context/AuthContext';
 import theme from '../core/ui/theme';
 import COLORS from '../core/constants/colors';
+import { getParkById } from '../core/config/parks';
 import { loadCameraTrapsWithPendingCounts } from '../features/camera-trap/ui/cameraTrapServices';
 
 const REVIEW_STEPS = [
@@ -36,6 +37,8 @@ export default function CameraTrapDashboard({ navigation }) {
     }, [])
   );
 
+  const parkLabel = user?.parkName || getParkById(user?.parkId)?.name || user?.parkId;
+
   const cameraCount = cameraTraps ? cameraTraps.length : '–';
   const pendingCount = cameraTraps
     ? cameraTraps.reduce((sum, ct) => sum + ct.pendingImageCount, 0)
@@ -52,10 +55,12 @@ export default function CameraTrapDashboard({ navigation }) {
               <Ionicons name="shield-checkmark" size={14} color={COLORS.TEXT_INVERSE} />
               <Text style={styles.chipText}>Park Manager</Text>
             </View>
-            <View style={styles.chip}>
-              <Ionicons name="location" size={14} color={COLORS.TEXT_INVERSE} />
-              <Text style={styles.chipText}>{user?.parkId || 'No park assigned'}</Text>
-            </View>
+            {parkLabel ? (
+              <View style={styles.chip}>
+                <Ionicons name="location" size={14} color={COLORS.TEXT_INVERSE} />
+                <Text style={styles.chipText}>{parkLabel}</Text>
+              </View>
+            ) : null}
           </View>
         </View>
 
