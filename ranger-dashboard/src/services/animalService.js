@@ -4,7 +4,7 @@
  */
 
 import {
-  collection, onSnapshot, query, orderBy,
+  collection, onSnapshot, query,
   doc, setDoc, updateDoc, deleteDoc, serverTimestamp, addDoc,
 } from 'firebase/firestore';
 import { db } from './firebase.js';
@@ -17,10 +17,15 @@ const PARKS = [
 ];
 
 export function subscribeToAnimals(callback) {
-  const q = query(collection(db, 'animal_profiles'), orderBy('name', 'asc'));
+  const q = query(collection(db, 'animal_profiles'));
   return onSnapshot(q,
-    (snap) => callback({ data: snap.docs.map((d) => ({ id: d.id, ...d.data() })), error: null }),
-    (err)  => callback({ data: [], error: err.message }),
+    (snap) => {
+      const data = snap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
+      callback({ data, error: null });
+    },
+    (err) => callback({ data: [], error: err.message }),
   );
 }
 
@@ -41,24 +46,35 @@ export async function deleteAnimal(id) {
 }
 
 /**
- * Convert image file to base64 and store in Firestore document.
- * No Firebase Storage needed — works immediately.
+ * Compress image and store as base64 in Firestore.
+ * Resizes to max 400px and compresses to ~50KB — well under Firestore 1MB limit.
  */
 export async function uploadAnimalPhoto(animalId, file) {
+  const base64 = await compressImage(file, 400, 0.5);
+  await updateAnimal(animalId, { imageUrl: base64 });
+  return base64;
+}
+
+function compressImage(file, maxWidth, quality) {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        const base64 = reader.result; // data:image/jpeg;base64,...
-        await updateAnimal(animalId, { imageUrl: base64 });
-        resolve(base64);
-      } catch (e) {
-        reject(e);
-      }
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const scale   = Math.min(1, maxWidth / img.width);
+      const canvas  = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
     };
-    reader.onerror = () => reject(new Error('Failed to read image file'));
-    reader.readAsDataURL(file);
+    img.onerror = () => reject(new Error('Image load failed'));
+    img.src = objectUrl;
   });
+}
+
+function resizeImage(file, maxWidth) {
+  return compressImage(file, maxWidth, 0.8);
 }
 
 export async function triggerCollarAlert(animal, riskZone) {

@@ -190,6 +190,25 @@ function AnimalCard({ animal, onEdit, onDelete, onUploadPhoto, onTrigger }) {
   );
 }
 
+// ── Field component (outside AnimalForm to prevent focus loss) ───────────────
+
+function Field({ label, name, type = 'text', options, value, onChange }) {
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>{label}</label>
+      {options ? (
+        <select value={value} onChange={(e) => onChange(name, e.target.value)}
+          style={{ width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }}>
+          {options.map((o) => <option key={o.value ?? o} value={o.value ?? o}>{o.label ?? o}</option>)}
+        </select>
+      ) : (
+        <input type={type} value={value} onChange={(e) => onChange(name, e.target.value)}
+          style={{ width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13, boxSizing: 'border-box' }} />
+      )}
+    </div>
+  );
+}
+
 // ── Animal form modal ─────────────────────────────────────────────────────────
 
 function AnimalForm({ initial, onSave, onClose, saving }) {
@@ -201,29 +220,11 @@ function AnimalForm({ initial, onSave, onClose, saving }) {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result;
-      setPreviewUrl(base64);
-      setForm((f) => ({ ...f, imageUrl: base64 }));
-    };
-    reader.readAsDataURL(file);
+    // Store the raw file for upload, show preview locally
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    setForm((f) => ({ ...f, _imageFile: file, imageUrl: null }));
   };
-
-  const Field = ({ label, name, type = 'text', options }) => (
-    <div style={{ marginBottom: 12 }}>
-      <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>{label}</label>
-      {options ? (
-        <select value={form[name]} onChange={(e) => set(name, e.target.value)}
-          style={{ width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }}>
-          {options.map((o) => <option key={o.value ?? o} value={o.value ?? o}>{o.label ?? o}</option>)}
-        </select>
-      ) : (
-        <input type={type} value={form[name]} onChange={(e) => set(name, e.target.value)}
-          style={{ width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13, boxSizing: 'border-box' }} />
-      )}
-    </div>
-  );
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -235,10 +236,8 @@ function AnimalForm({ initial, onSave, onClose, saving }) {
 
         {/* Photo upload */}
         <div style={{ marginBottom: 16, textAlign: 'center' }}>
-          <div
-            onClick={() => fileRef.current?.click()}
-            style={{ width: '100%', height: 140, borderRadius: 8, border: '2px dashed #d1d5db', background: '#f9fafb', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', position: 'relative' }}
-          >
+          <div onClick={() => fileRef.current?.click()}
+            style={{ width: '100%', height: 140, borderRadius: 8, border: '2px dashed #d1d5db', background: '#f9fafb', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }}>
             {previewUrl
               ? <img src={previewUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : <><Upload size={28} color="#9ca3af" /><span style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>Click to add photo (optional)</span></>
@@ -255,18 +254,18 @@ function AnimalForm({ initial, onSave, onClose, saving }) {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
           <div style={{ gridColumn: '1/-1' }}>
-            <Field label="Animal ID (e.g. WL-E104)" name="id" />
+            <Field label="Animal ID (e.g. WL-E104)" name="id" value={form.id} onChange={set} />
           </div>
           <div style={{ gridColumn: '1/-1' }}>
-            <Field label="Name" name="name" />
+            <Field label="Name" name="name" value={form.name} onChange={set} />
           </div>
-          <Field label="Species" name="species" options={SPECIES_OPTIONS} />
-          <Field label="Collar ID" name="collarId" />
-          <Field label="Park" name="parkId" options={PARKS.map((p) => ({ value: p.id, label: p.name }))} />
-          <Field label="Status" name="status" options={STATUS_OPTIONS} />
-          <Field label="Zone / Area" name="zone" />
-          <Field label="Latitude" name="latitude" type="number" />
-          <Field label="Longitude" name="longitude" type="number" />
+          <Field label="Species" name="species" value={form.species} onChange={set} options={SPECIES_OPTIONS} />
+          <Field label="Collar ID" name="collarId" value={form.collarId} onChange={set} />
+          <Field label="Park" name="parkId" value={form.parkId} onChange={set} options={PARKS.map((p) => ({ value: p.id, label: p.name }))} />
+          <Field label="Status" name="status" value={form.status} onChange={set} options={STATUS_OPTIONS} />
+          <Field label="Zone / Area" name="zone" value={form.zone} onChange={set} />
+          <Field label="Latitude" name="latitude" type="number" value={form.latitude} onChange={set} />
+          <Field label="Longitude" name="longitude" type="number" value={form.longitude} onChange={set} />
           <div style={{ gridColumn: '1/-1', marginBottom: 12 }}>
             <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Notes</label>
             <textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={3}
@@ -277,7 +276,7 @@ function AnimalForm({ initial, onSave, onClose, saving }) {
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
           <button onClick={onClose} style={{ padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: 6, background: '#f9fafb', cursor: 'pointer', fontSize: 13 }}>Cancel</button>
           <button onClick={() => onSave(form)} disabled={saving || !form.name || !form.id}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', border: 'none', borderRadius: 6, background: '#1B5E20', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600, opacity: saving ? 0.7 : 1 }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', border: 'none', borderRadius: 6, background: '#1B5E20', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600, opacity: (saving || !form.name || !form.id) ? 0.6 : 1 }}>
             <Save size={14} /> {saving ? 'Saving…' : 'Save Animal'}
           </button>
         </div>
@@ -315,16 +314,24 @@ export default function Wildlife() {
   const handleSave = async (form) => {
     setSaving(true);
     try {
-      const data = {
-        ...form,
-        latitude:  form.latitude  ? parseFloat(form.latitude)  : null,
-        longitude: form.longitude ? parseFloat(form.longitude) : null,
+      const { _imageFile, ...data } = form;
+      const cleanData = {
+        ...data,
+        latitude:  data.latitude  ? parseFloat(data.latitude)  : null,
+        longitude: data.longitude ? parseFloat(data.longitude) : null,
       };
+
       if (editTarget) {
-        await updateAnimal(form.id, data);
+        await updateAnimal(form.id, cleanData);
       } else {
-        await createAnimal(data);
+        await createAnimal(cleanData);
       }
+
+      // Upload image after animal is saved
+      if (_imageFile) {
+        await uploadAnimalPhoto(form.id, _imageFile);
+      }
+
       setShowForm(false);
       setEditTarget(null);
     } catch (e) {
