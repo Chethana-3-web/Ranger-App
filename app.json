@@ -35,10 +35,13 @@
     },
     "owner": "cheind",
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "sdkVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/237eb1b5-d8f8-4c1a-a8dc-d22ce632f684"
+      "url": "https://u.expo.dev/237eb1b5-d8f8-4c1a-a8dc-d22ce632f684",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 30000
     }
   }
 }
