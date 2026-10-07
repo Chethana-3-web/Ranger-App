@@ -24,7 +24,7 @@ import {
 import { db } from './firebase.js';
 
 /** Human-readable labels matching the mobile app's IncidentType enum */
-const INCIDENT_TYPE_LABELS = {
+export const INCIDENT_TYPE_LABELS = {
   EMERGENCY:'EMERGENCY INCIDENT',
   SNARE:    'Snare / Trap',
   CARCASS:  'Animal Carcass',

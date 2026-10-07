@@ -1,5 +1,8 @@
-import React from 'react';
-import { Users, AlertTriangle, ShieldCheck, MapPin } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Users, AlertTriangle, ShieldCheck, MapPin, MessageSquare } from 'lucide-react';
+import { useIncidents } from '../hooks/useIncidents.js';
+import { subscribeToCommunityReports } from '../services/incidentService.js';
 
 // Simple SVG Bar Chart
 const BarChart = ({ data }) => {
@@ -22,7 +25,22 @@ const BarChart = ({ data }) => {
   );
 };
 
+// Community report statuses that still need an officer's first response
+const PENDING_REPORT_STATUSES = ['Received', 'SUBMITTED', 'PENDING_SYNC'];
+
 export default function DashboardOverview() {
+  const { incidents, loading: incidentsLoading } = useIncidents();
+  const [pendingReports, setPendingReports] = useState(null);
+
+  useEffect(() => {
+    const unsub = subscribeToCommunityReports(({ data, error }) => {
+      setPendingReports(error ? null : data.filter((r) => PENDING_REPORT_STATUSES.includes(r.status)).length);
+    });
+    return () => unsub();
+  }, []);
+
+  const newIncidents = incidents.filter((i) => i.workflowStatus === 'New').length;
+
   const weeklyData = [
     { label: 'Mon', value: 12 },
     { label: 'Tue', value: 19 },
@@ -36,7 +54,8 @@ export default function DashboardOverview() {
   const statCards = [
     { title: 'Total Rangers', value: '142', icon: Users, color: '#1976d2' },
     { title: 'Active Patrols', value: '24', icon: ShieldCheck, color: '#388e3c' },
-    { title: 'New Incidents', value: '15', icon: AlertTriangle, color: '#d32f2f' },
+    { title: 'New Incidents', value: incidentsLoading ? '…' : String(newIncidents), icon: AlertTriangle, color: '#d32f2f', to: '/incidents' },
+    { title: 'Pending Community Reports', value: pendingReports === null ? '—' : String(pendingReports), icon: MessageSquare, color: '#7b1fa2', to: '/community' },
     { title: 'Areas Covered', value: '87%', icon: MapPin, color: '#f57c00' },
   ];
 
@@ -46,8 +65,10 @@ export default function DashboardOverview() {
       
       {/* Stat Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 32 }}>
-        {statCards.map((stat, i) => (
-          <div key={i} style={{ background: 'white', padding: 20, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: 16 }}>
+        {statCards.map((stat, i) => {
+          const Card = stat.to ? Link : 'div';
+          return (
+          <Card key={i} to={stat.to} style={{ background: 'white', padding: 20, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: 16, textDecoration: 'none' }}>
             <div style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: `${stat.color}15`, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <stat.icon size={28} color={stat.color} />
             </div>
@@ -55,8 +76,9 @@ export default function DashboardOverview() {
               <p style={{ margin: 0, fontSize: 14, color: '#666', fontWeight: '500' }}>{stat.title}</p>
               <h2 style={{ margin: '4px 0 0 0', fontSize: 24, fontWeight: 'bold', color: '#333' }}>{stat.value}</h2>
             </div>
-          </div>
-        ))}
+          </Card>
+          );
+        })}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20 }}>

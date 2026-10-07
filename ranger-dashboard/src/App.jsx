@@ -5,6 +5,8 @@ import Monitoring from './pages/Monitoring.jsx';
 import DashboardOverview from './pages/DashboardOverview.jsx';
 import PlaceholderPage from './pages/PlaceholderPage.jsx';
 import CommunityReports from './pages/CommunityReports.jsx';
+import Incidents from './pages/Incidents.jsx';
+import IncidentDetails from './pages/IncidentDetails.jsx';
 import VerifyRangers from './pages/VerifyRangers.jsx';
 import Settings from './pages/Settings.jsx';
 import Login from './pages/Login.jsx';
@@ -22,7 +24,8 @@ export default function App() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard"  element={<DashboardOverview />} />
         <Route path="monitoring" element={<Monitoring />} />
-        <Route path="incidents"  element={<PlaceholderPage title="Incidents"                   member={3} />} />
+        <Route path="incidents"  element={<Incidents />} />
+        <Route path="incidents/:id" element={<IncidentDetails />} />
         <Route path="community"  element={<CommunityReports />} />
         <Route path="wildlife"   element={<PlaceholderPage title="Wildlife"                    member={4} />} />
         <Route path="alerts"     element={<PlaceholderPage title="Wildlife Alerts"             member={4} />} />
