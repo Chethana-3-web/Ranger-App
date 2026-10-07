@@ -15,7 +15,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 
 import AppHeader from '../../../core/ui/AppHeader';
 import OfflineBanner from '../../../core/ui/OfflineBanner';
-import { subscribeToAlert, acknowledgeAlert } from '../services/alertService';
+import { subscribeToAlert, acknowledgeAlert, subscribeToAnimalProfile } from '../services/alertService';
 import { useSession } from '../../../core/session/SessionContext';
 import COLORS from '../../../core/constants/colors';
 import theme from '../../../core/ui/theme';
@@ -57,6 +57,23 @@ export default function AlertDetailScreen() {
     });
     return unsub;
   }, [params.alert.id]);
+
+  // Subscribe to animal profile — gets name, species, imageUrl from animal_profiles
+  useEffect(() => {
+    if (!alert.animalId) return;
+    const unsub = subscribeToAnimalProfile(alert.animalId, (profile) => {
+      if (profile) {
+        setAlert((prev) => ({
+          ...prev,
+          animalName:     profile.name      ?? prev.animalName,
+          species:        profile.species   ?? prev.species,
+          collarId:       profile.collarId  ?? prev.collarId,
+          animalImageUrl: profile.imageUrl  ?? prev.animalImageUrl,
+        }));
+      }
+    });
+    return unsub;
+  }, [alert.animalId]);
 
   const riskColor      = RISK_COLOR[alert.riskLevel] ?? RISK_COLOR.Medium;
   const time           = new Date(alert.generatedAt).toLocaleString();

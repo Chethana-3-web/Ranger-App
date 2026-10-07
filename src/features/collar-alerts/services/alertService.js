@@ -215,3 +215,23 @@ export async function updateAlertResponse({ responseId, alertId, outcome, notes,
 export async function deleteAlertResponse(responseId) {
   await deleteDoc(doc(db, 'collar_responses', responseId));
 }
+
+// ── Fetch animal profile from Firestore ───────────────────────────────────────
+
+/**
+ * Subscribe to a single animal profile by animalId.
+ * Returns null if animal doesn't exist in Firestore.
+ *
+ * @param {string} animalId
+ * @param {(animal: object|null) => void} callback
+ * @returns {() => void} unsubscribe
+ */
+export function subscribeToAnimalProfile(animalId, callback) {
+  if (!animalId) { callback(null); return () => {}; }
+  const unsub = onSnapshot(
+    doc(db, 'animal_profiles', animalId),
+    (snap) => callback(snap.exists() ? { id: snap.id, ...snap.data() } : null),
+    (err)  => { console.warn('[alertService] animal profile error:', err.message); callback(null); },
+  );
+  return unsub;
+}
