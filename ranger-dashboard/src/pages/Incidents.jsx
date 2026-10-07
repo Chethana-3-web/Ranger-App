@@ -146,10 +146,10 @@ export default function Incidents() {
             Reports logged by rangers in the field. Open one to review, assign and resolve it.
           </p>
         </div>
-        {!loading && (
-          <span className={`incidents-source${error ? ' is-sample' : ''}`}>
+        {!loading && error && (
+          <span className="incidents-source is-sample">
             <span className="incidents-source-dot" />
-            {error ? 'Sample data (live data unavailable)' : 'Live'}
+            Sample data (live data unavailable)
           </span>
         )}
       </header>
