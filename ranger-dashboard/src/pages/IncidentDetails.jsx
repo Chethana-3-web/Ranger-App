@@ -5,7 +5,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ArrowLeft, ImageOff } from 'lucide-react';
 import { useIncidents } from '../hooks/useIncidents.js';
-import { getParkById, getRangerById, getRangersByPark } from '../data/mockData.js';
+import { useRangers } from '../hooks/useRangers.js';
+import { getParkById, getRangerById } from '../data/mockData.js';
 import {
   WORKFLOW_STEPS, SEVERITIES, updateIncidentWorkflow,
 } from '../services/incidentWorkflowService.js';
@@ -40,6 +41,7 @@ function getPhotoUrl(incident) {
 export default function IncidentDetails() {
   const { id } = useParams();
   const { incidents, loading } = useIncidents();
+  const { rangers, loading: rangersLoading } = useRangers();
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
 
@@ -59,9 +61,12 @@ export default function IncidentDetails() {
   }
 
   const park = getParkById(incident.parkId);
-  const reporter = getRangerById(incident.reportedBy);
-  const assigned = getRangerById(incident.assignedRangerId);
-  const parkRangers = getRangersByPark(incident.parkId);
+  // Real verified rangers first; sample rangers only to name older records
+  const findRanger = (rangerId) => rangers.find((r) => r.id === rangerId) ?? getRangerById(rangerId);
+  const reporter = findRanger(incident.reportedBy);
+  const assigned = findRanger(incident.assignedRangerId);
+  // Keep the current assignee selectable even if they are not a verified ranger
+  const isAssignedListed = rangers.some((r) => r.id === incident.assignedRangerId);
   const photoUrl = getPhotoUrl(incident);
   const hasLocation = typeof incident.latitude === 'number' && typeof incident.longitude === 'number';
 
@@ -95,7 +100,7 @@ export default function IncidentDetails() {
       save({ assignedRangerId: null }, 'Ranger unassigned');
       return;
     }
-    const ranger = getRangerById(rangerId);
+    const ranger = findRanger(rangerId);
     const changes = { assignedRangerId: rangerId };
     // Assigning a ranger moves an incident that is still being triaged to Assigned
     if (stepIndex < WORKFLOW_STEPS.indexOf('Assigned')) changes.workflowStatus = 'Assigned';
@@ -131,7 +136,7 @@ export default function IncidentDetails() {
               <Field label="Park" value={park?.name ?? incident.parkId ?? '—'} />
               <Field label="Date / time" value={formatDateTime(incident.reportedAt)} />
               <Field label="Reporter" value={reporter ? `${reporter.name} (${reporter.id})` : incident.reportedBy ?? '—'} />
-              <Field label="Assigned ranger" value={assigned ? `${assigned.name} (${assigned.id})` : 'Not assigned'} />
+              <Field label="Assigned ranger" value={assigned?.name ?? incident.assignedRangerId ?? 'Not assigned'} />
               <Field
                 label="GPS location"
                 value={hasLocation ? `${incident.latitude.toFixed(5)}, ${incident.longitude.toFixed(5)}` : 'Not available'}
@@ -211,10 +216,16 @@ export default function IncidentDetails() {
                   style={styles.select}
                 >
                   <option value="">Not assigned</option>
-                  {parkRangers.map((r) => (
-                    <option key={r.id} value={r.id}>{r.name} · {r.status}</option>
+                  {incident.assignedRangerId && !isAssignedListed && (
+                    <option value={incident.assignedRangerId}>{assigned?.name ?? incident.assignedRangerId}</option>
+                  )}
+                  {rangers.map((r) => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
                   ))}
                 </select>
+                {!rangersLoading && rangers.length === 0 && (
+                  <span style={styles.muted}>No verified rangers yet. Approve rangers on the Verify Rangers page.</span>
+                )}
               </label>
             </div>
             {saving && <div style={styles.saving}>Saving…</div>}
