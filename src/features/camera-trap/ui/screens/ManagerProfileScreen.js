@@ -44,7 +44,7 @@ export default function ManagerProfileScreen() {
         <InfoRow icon="person-outline"  label="Full Name"  value={user?.fullName || 'Not provided'} />
         <InfoRow icon="mail-outline"    label="Email"      value={user?.email || 'Not provided'} />
         <InfoRow icon="id-card-outline" label="Manager ID" value={user?.id || 'N/A'} />
-        <InfoRow icon="map-outline"     label="Park"       value={park?.name ?? user?.parkId ?? 'Not assigned'} />
+        <InfoRow icon="map-outline"     label="Park"       value={user?.parkName || park?.name || user?.parkId || 'Not assigned'} />
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={20} color={COLORS.TEXT_INVERSE} />
