@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useLocation } from 'react-router-dom';
 import SyncStatusChip from '../monitoring/SyncStatusChip.jsx';
 import { useSyncStatus } from '../../context/SyncContext.jsx';
@@ -15,7 +15,7 @@ const TITLES = {
 };
 
 /**
- * Topbar – reads live sync status from SyncContext (updated by Monitoring page).
+ * Topbar ΓÇô reads live sync status from SyncContext (updated by Monitoring page).
  * Member 1: add user avatar / notification bell in topbar-right.
  */
 export default function Topbar() {
