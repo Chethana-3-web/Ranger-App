@@ -12,6 +12,7 @@
 
 /** Frozen enum of all incident types. */
 export const IncidentType = Object.freeze({
+  EMERGENCY:'EMERGENCY',
   SNARE:    'SNARE',
   CARCASS:  'CARCASS',
   TRACKS:   'TRACKS',
@@ -21,6 +22,7 @@ export const IncidentType = Object.freeze({
 
 /** Human-readable labels for each incident type. */
 export const INCIDENT_TYPE_LABELS = Object.freeze({
+  EMERGENCY:'EMERGENCY INCIDENT',
   SNARE:    'Snare / Trap',
   CARCASS:  'Animal Carcass',
   TRACKS:   'Animal Tracks',

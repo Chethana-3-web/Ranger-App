@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../constants/colors';
 
-const AppHeader = ({ title, subtitle, onBack, accentColor = COLORS.HEADER_BG }) => {
+const AppHeader = ({ title, subtitle, onBack, onClose, accentColor = COLORS.HEADER_BG }) => {
   return (
     <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: accentColor }]}>
       <View style={styles.row}>
@@ -44,8 +44,20 @@ const AppHeader = ({ title, subtitle, onBack, accentColor = COLORS.HEADER_BG }) 
           ) : null}
         </View>
 
-        {/* Right spacer to keep title centred */}
-        <View style={styles.backPlaceholder} />
+        {/* Right close button or spacer */}
+        {onClose ? (
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.backBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="close" size={22} color="#fff" />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.backPlaceholder} />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -88,3 +100,5 @@ const styles = StyleSheet.create({
 });
 
 export default AppHeader;
+
+

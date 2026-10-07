@@ -10,7 +10,7 @@
 
 import { AsyncStorageIncidentRepository } from './infrastructure/asyncStorageIncidentRepository';
 import { AsyncStorageDraftRepository } from './infrastructure/asyncStorageDraftRepository';
-import { MockRemoteGateway } from './infrastructure/mockRemoteGateway';
+import { FirebaseRemoteGateway } from './infrastructure/firebaseRemoteGateway';
 import { GpsLocationProvider } from './infrastructure/gpsLocationProvider';
 import { ExpoCameraProvider } from './infrastructure/expoCameraProvider';
 import { ExpoPhotoStore } from './infrastructure/expoPhotoStore';
@@ -34,7 +34,7 @@ export const LOG_INCIDENT_ROUTE = 'LogIncidentFlow';
 export function registerLogIncidentFeature(container, kvStore, connectivityMonitor) {
   const incidentRepo = AsyncStorageIncidentRepository(kvStore);
   const draftRepo    = AsyncStorageDraftRepository(kvStore);
-  const gateway      = MockRemoteGateway();
+  const gateway      = FirebaseRemoteGateway();
   const photoStore   = ExpoPhotoStore();
 
   container.singleton('log-incident.incidentRepo',      incidentRepo);

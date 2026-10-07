@@ -15,6 +15,7 @@ export const MAX_SYNC_ATTEMPTS = 5;
 /**
  * @typedef {Object} Incident
  * @property {string}      id             – client-generated UUID
+ * @property {string}      reportType
  * @property {string}      type           – IncidentType key
  * @property {string}      description    – trimmed, 1-500 chars
  * @property {import('../../../core/domain/location').RangerLocation} location
@@ -34,6 +35,7 @@ export const MAX_SYNC_ATTEMPTS = 5;
  *
  * @param {{
  *   id: string,
+ *   reportType?: string,
  *   type: string,
  *   description: string,
  *   location: import('../../../core/domain/location').RangerLocation,
@@ -47,7 +49,7 @@ export const MAX_SYNC_ATTEMPTS = 5;
  */
 export function createIncident(fields) {
   return {
-    id:           fields.id,
+    id: fields.id, reportType: fields.reportType,
     type:         fields.type,
     description:  fields.description,
     location:     fields.location,
