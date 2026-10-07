@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { collection, doc, setDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
 import { db } from '../core/config/firebase';
+import { SEED_USERS } from '../core/config/seeds';
 
 const AuthContext = createContext();
 
@@ -39,6 +40,14 @@ export const AuthProvider = ({ children }) => {
         await AsyncStorage.setItem('@user', JSON.stringify(adminUser));
         setUser(adminUser);
         return adminUser;
+      }
+
+      // Check seed users (works offline, no Firebase needed)
+      const seed = SEED_USERS.find(s => s.email === email && s.password === password);
+      if (seed) {
+        await AsyncStorage.setItem('@user', JSON.stringify(seed.user));
+        setUser(seed.user);
+        return seed.user;
       }
 
       const usersRef = collection(db, 'users');

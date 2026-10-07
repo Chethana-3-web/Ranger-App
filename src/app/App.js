@@ -56,6 +56,12 @@ setDIContainer(diContainer);
 setServicesContainer(diContainer);
 
 import { SessionProvider } from '../core/session/SessionContext';
+import { seedCollarAlerts } from '../features/collar-alerts/services/seedAlerts';
+
+// Seed Firestore with mock alerts once on first dev launch
+if (__DEV__) {
+  seedCollarAlerts().catch((e) => console.warn('[seed] collar alerts:', e.message));
+}
 
 const App = () => {
   const [simulatorPanelVisible, setSimulatorPanelVisible] = useState(false);
