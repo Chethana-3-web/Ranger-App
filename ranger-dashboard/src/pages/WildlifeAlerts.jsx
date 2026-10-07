@@ -114,6 +114,12 @@ function ResponseItem({ r }) {
       </div>
       <p style={{ margin: 0, fontSize: 13, color: '#374151', lineHeight: 1.5 }}>{r.notes}</p>
       <p style={{ margin: '4px 0 0', fontSize: 11, color: '#9ca3af' }}>by {r.rangerId}</p>
+      {r.photoUri && (
+        <div style={{ marginTop: 8 }}>
+          <img src={r.photoUri} alt="Evidence"
+            style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', borderRadius: 6, display: 'block' }} />
+        </div>
+      )}
     </div>
   );
 }

@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../../core/config/firebase';
 import { MOCK_ALERTS } from '../data/mockAlerts';
+import { uriToBase64 } from './photoUploadService';
 
 // ── Subscribe to live alerts list ─────────────────────────────────────────────
 
@@ -117,6 +118,16 @@ export async function submitAlertResponse({ alertId, rangerId, outcome, notes, p
     Reassigned: 'Active/Reassigned',
   };
 
+  // Convert local photo URI to base64 so web dashboard can display it
+  let photoData = null;
+  if (photoUri) {
+    try {
+      photoData = await uriToBase64(photoUri);
+    } catch {
+      photoData = null; // don't block submission if photo fails
+    }
+  }
+
   await updateDoc(doc(db, 'collar_alerts', alertId), {
     status:     statusMap[outcome] ?? 'Resolved',
     resolvedBy: rangerId,
@@ -128,7 +139,7 @@ export async function submitAlertResponse({ alertId, rangerId, outcome, notes, p
     rangerId,
     outcome,
     notes,
-    photoUri,
+    photoUri: photoData, // base64 — readable by web dashboard
     submittedAt: serverTimestamp(),
   });
 }
@@ -191,10 +202,20 @@ export async function updateAlertResponse({ responseId, alertId, outcome, notes,
     Reassigned: 'Active/Reassigned',
   };
 
+  // Convert local photo URI to base64 if it's a local file URI
+  let photoData = photoUri;
+  if (photoUri && photoUri.startsWith('file://')) {
+    try {
+      photoData = await uriToBase64(photoUri);
+    } catch {
+      photoData = null;
+    }
+  }
+
   await updateDoc(doc(db, 'collar_responses', responseId), {
     outcome,
     notes,
-    photoUri,
+    photoUri: photoData,
     updatedAt: serverTimestamp(),
   });
 
