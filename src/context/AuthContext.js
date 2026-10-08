@@ -1,7 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { collection, doc, setDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
-import { db } from '../core/config/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { db, auth } from '../core/config/firebase';
 import { SEED_USERS } from '../core/config/seeds';
 
 const AuthContext = createContext();
@@ -64,8 +65,12 @@ export const AuthProvider = ({ children }) => {
         return seed.user;
       }
 
+      // Use Firebase Authentication for real users
+      const authResult = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Get user data from Firestore
       const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('email', '==', email), where('password', '==', password));
+      const q = query(usersRef, where('email', '==', email));
       const snapshot = await getDocs(q);
 
       if (!snapshot.empty) {
@@ -77,7 +82,7 @@ export const AuthProvider = ({ children }) => {
         setUser(foundUser);
         return foundUser;
       } else {
-        throw new Error('Invalid email or password.');
+        throw new Error('User profile not found in database.');
       }
     } catch (e) {
       throw new Error(e.message || 'Network error logging in');
@@ -94,11 +99,17 @@ export const AuthProvider = ({ children }) => {
         throw new Error('An account already exists with this email address.');
       }
       
+      // Create Firebase Auth account
+      const authResult = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+      
       const newUser = { 
         ...userData, 
-        id: `USR-${Date.now()}`,
+        id: authResult.user.uid,
         isVerified: userData.role === 'officer' ? false : true 
       };
+      
+      // Remove password from Firestore (it's stored securely in Firebase Auth)
+      delete newUser.password;
       
       await setDoc(doc(db, 'users', newUser.id), newUser);
       return newUser;

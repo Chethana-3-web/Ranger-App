@@ -1,5 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, initializeFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { Platform } from 'react-native';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAqIqZaZDIafRo064Nb24lhbDU4EffqPWM",
@@ -17,5 +19,8 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
 });
+
+// Initialize auth only for native platforms (suppress web warning)
+export const auth = Platform.OS !== 'web' ? getAuth(app) : null;
 
 export default app;

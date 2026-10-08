@@ -35,4 +35,17 @@ export const SEED_USERS = [
       patrolId:   'PTL-002',
     },
   },
+  {
+    email:    'ranger3@yala.lk',
+    password: 'RangerTest1!',
+    user: {
+      id:         'USR-ranger3',
+      email:      'ranger3@yala.lk',
+      role:       'officer',
+      isVerified: true,
+      fullName:   'Ranger Kumara',
+      parkId:     'PARK-YALA',
+      patrolId:   'PTL-003',
+    },
+  },
 ];
