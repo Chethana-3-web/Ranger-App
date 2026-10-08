@@ -65,12 +65,9 @@ export const AuthProvider = ({ children }) => {
         return seed.user;
       }
 
-      // Use Firebase Authentication for real users
-      const authResult = await signInWithEmailAndPassword(auth, email, password);
-      
-      // Get user data from Firestore
+      // Check Firestore for user credentials (works everywhere)
       const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('email', '==', email));
+      const q = query(usersRef, where('email', '==', email), where('password', '==', password));
       const snapshot = await getDocs(q);
 
       if (!snapshot.empty) {
@@ -82,10 +79,17 @@ export const AuthProvider = ({ children }) => {
         setUser(foundUser);
         return foundUser;
       } else {
-        throw new Error('User profile not found in database.');
+        throw new Error('Invalid email or password.');
       }
     } catch (e) {
-      throw new Error(e.message || 'Network error logging in');
+      const errorMessage = e.code === 'auth/configuration-not-found' 
+        ? 'Firebase Auth not configured. Contact support.'
+        : e.code === 'auth/user-not-found'
+        ? 'Invalid email or password.'
+        : e.code === 'auth/wrong-password'
+        ? 'Invalid email or password.'
+        : e.message || 'Network error logging in';
+      throw new Error(errorMessage);
     }
   };
 
@@ -99,17 +103,11 @@ export const AuthProvider = ({ children }) => {
         throw new Error('An account already exists with this email address.');
       }
       
-      // Create Firebase Auth account
-      const authResult = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-      
       const newUser = { 
         ...userData, 
-        id: authResult.user.uid,
+        id: `USR-${Date.now()}`,
         isVerified: userData.role === 'officer' ? false : true 
       };
-      
-      // Remove password from Firestore (it's stored securely in Firebase Auth)
-      delete newUser.password;
       
       await setDoc(doc(db, 'users', newUser.id), newUser);
       return newUser;

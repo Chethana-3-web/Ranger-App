@@ -21,6 +21,6 @@ export const db = initializeFirestore(app, {
 });
 
 // Initialize auth only for native platforms (suppress web warning)
-export const auth = Platform.OS !== 'web' ? getAuth(app) : null;
+export const auth = Platform.OS !== 'web' ? getAuth(app) : getAuth(app);
 
 export default app;
