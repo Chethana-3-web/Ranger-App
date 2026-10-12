@@ -33,7 +33,7 @@ describe('parks config', () => {
       const yala = PARKS.find((p) => p.id === 'PARK-YALA');
       expect(yala).toBeDefined();
       expect(yala.enabledIncidentTypes).toEqual(
-        expect.arrayContaining(['SNARE', 'CARCASS', 'CAMP', 'FOOTPRINT', 'OTHER'])
+        expect.arrayContaining(['EMERGENCY', 'SNARE', 'CARCASS', 'CAMPSITE', 'TRACKS', 'OTHER'])
       );
     });
 

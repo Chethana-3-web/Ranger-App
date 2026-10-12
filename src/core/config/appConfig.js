@@ -16,8 +16,11 @@ const apiConfig = {
   /** Sync retry attempts before marking an incident as FAILED */
   SYNC_RETRY_LIMIT: 3,
 
-  /** How often (ms) the background sync loop runs when online */
-  SYNC_INTERVAL_MS: 30000,
+  /** Web Dashboard hosted URL (Render / Production) */
+  DASHBOARD_URL: 'https://ranger-dashboard.onrender.com',
+
+  /** Local development Dashboard URL */
+  LOCAL_DASHBOARD_URL: 'http://localhost:5173',
 };
 
 export default apiConfig;

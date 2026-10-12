@@ -9,6 +9,13 @@
     "web": "expo start --web",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage --passWithNoTests",
+    "test:core": "jest src/core/ --passWithNoTests",
+    "test:log-incident": "jest src/features/log-incident/ --passWithNoTests",
+    "test:camera-trap": "jest src/features/camera-trap/ --passWithNoTests",
+    "test:community-report": "jest src/features/community-report/ --passWithNoTests",
+    "test:collar-alerts": "jest src/features/collar-alerts/ --passWithNoTests",
+    "test:dashboard": "npm --prefix ranger-dashboard test",
+    "test:all": "npm test && npm run test:dashboard",
     "lint": "npx --no-install eslint src/ --ext .js,.jsx",
     "format": "npx --no-install prettier --write \"src/**/*.{js,jsx}\""
   },
@@ -73,6 +80,10 @@
     },
     "setupFiles": [
       "@react-native-async-storage/async-storage/jest/async-storage-mock"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/ranger-dashboard/",
+      "<rootDir>/dashboard/"
     ],
     "testMatch": [
       "**/__tests__/**/*.test.[jt]s?(x)",

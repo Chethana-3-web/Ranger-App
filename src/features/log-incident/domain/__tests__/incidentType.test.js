@@ -15,15 +15,15 @@ describe('IncidentType', () => {
     expect(Object.isFrozen(IncidentType)).toBe(true);
   });
 
-  test('IncidentType_enum_hasFiveKeys', () => {
-    expect(Object.keys(IncidentType)).toHaveLength(5);
+  test('IncidentType_enum_hasSixKeys', () => {
+    expect(Object.keys(IncidentType)).toHaveLength(6);
   });
 });
 
 describe('getAllIncidentTypes', () => {
-  test('getAllIncidentTypes_called_returnsAllFiveEntries', () => {
+  test('getAllIncidentTypes_called_returnsAllSixEntries', () => {
     const types = getAllIncidentTypes();
-    expect(types).toHaveLength(5);
+    expect(types).toHaveLength(6);
   });
 
   test('getAllIncidentTypes_called_eachEntryHasKeyAndLabel', () => {

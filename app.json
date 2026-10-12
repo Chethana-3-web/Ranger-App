@@ -28,21 +28,14 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "237eb1b5-d8f8-4c1a-a8dc-d22ce632f684"
-      }
-    },
-    "owner": "cheind",
+    "owner": "2026oslo",
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
-    "updates": {
-      "url": "https://u.expo.dev/237eb1b5-d8f8-4c1a-a8dc-d22ce632f684",
-      "enabled": true,
-      "checkAutomatically": "ON_LOAD",
-      "fallbackToCacheTimeout": 30000
+    "extra": {
+      "eas": {
+        "projectId": "501667a2-1f60-4184-b7d1-810930384ec3"
+      }
     }
   }
 }
-

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * incidentService.js — Firestore incident integration for the dashboard.
  *
  * The mobile app writes to the 'incidents' collection via:
@@ -33,7 +33,7 @@ export const INCIDENT_TYPE_LABELS = {
  * - Flattens nested location to top-level lat/lng for Leaflet
  * - Maps PENDING_SYNC → 'Received' (in Firestore = it arrived)
  */
-function normaliseIncident(raw) {
+export function normaliseIncident(raw) {
   const lat = raw.location?.latitude  ?? raw.latitude  ?? null;
   const lng = raw.location?.longitude ?? raw.longitude ?? null;
 
