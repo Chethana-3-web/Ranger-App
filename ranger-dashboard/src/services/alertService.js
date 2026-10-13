@@ -1,7 +1,7 @@
 ﻿/**
- * alertService.js ΓÇö Firestore alert integration for the web dashboard.
+ * alertService.js – Firestore alert integration for the web dashboard.
  * Reads collar_alerts and collar_responses collections.
- * Falls back to mockData if Firestore is unreachable.
+ * Alerts are created from the Wildlife page – no mock fallback.
  */
 
 import {
@@ -9,9 +9,9 @@ import {
   doc, updateDoc, serverTimestamp, where, deleteDoc,
 } from 'firebase/firestore';
 import { db } from './firebase.js';
-import { WILDLIFE_ALERTS, WILDLIFE } from '../data/mockData.js';
+import { WILDLIFE } from '../data/mockData.js';
 
-// ΓöÇΓöÇ Subscribe to all collar alerts ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Subscribe to all collar alerts ───────────────────────────────────────────
 
 export function subscribeToCollarAlerts(callback) {
   callback({ data: [], error: null, loading: true });
@@ -21,16 +21,16 @@ export function subscribeToCollarAlerts(callback) {
   return onSnapshot(q,
     (snap) => {
       const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      callback({ data: data.length > 0 ? data : WILDLIFE_ALERTS, error: null, loading: false });
+      callback({ data, error: null, loading: false });
     },
     (err) => {
-      console.warn('[alertService] using mock data:', err.message);
-      callback({ data: WILDLIFE_ALERTS, error: err.message, loading: false });
+      console.warn('[alertService] Firestore error:', err.message);
+      callback({ data: [], error: err.message, loading: false });
     },
   );
 }
 
-// ΓöÇΓöÇ Subscribe to responses for a specific alert ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Subscribe to responses for a specific alert ───────────────────────────────
 
 export function subscribeToAlertResponses(alertId, callback) {
   const q = query(
@@ -53,7 +53,7 @@ export function subscribeToAlertResponses(alertId, callback) {
   );
 }
 
-// ΓöÇΓöÇ Update alert status ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Update alert status ───────────────────────────────────────────────────────
 
 export async function updateAlertStatus(alertId, status) {
   await updateDoc(doc(db, 'collar_alerts', alertId), {
@@ -62,13 +62,13 @@ export async function updateAlertStatus(alertId, status) {
   });
 }
 
-// ΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 export function getAnimalById(animalId) {
   return WILDLIFE.find((w) => w.id === animalId) ?? null;
 }
 
-// ΓöÇΓöÇ Delete an alert ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Delete an alert ───────────────────────────────────────────────────────────
 
 export async function deleteCollarAlert(alertId) {
   await deleteDoc(doc(db, 'collar_alerts', alertId));

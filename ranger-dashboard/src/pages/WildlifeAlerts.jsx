@@ -1,5 +1,5 @@
 ﻿/**
- * WildlifeAlerts ΓÇö Member 4 dashboard page.
+ * WildlifeAlerts – Member 4 dashboard page.
  * List + detail + status management for collar alerts.
  * Reads live from Firestore collar_alerts / collar_responses.
  */
@@ -14,7 +14,7 @@ import {
   deleteCollarAlert,
 } from '../services/alertService.js';
 
-// ΓöÇΓöÇ Constants ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// -- Constants -----------------------------------------------------------------
 
 const RISK_COLORS = {
   Critical: { bg: '#fef2f2', border: '#fca5a5', text: '#b91c1c', dot: '#dc2626' },
@@ -43,12 +43,12 @@ function statusColor(status) {
 }
 
 function formatTime(val) {
-  if (!val) return 'ΓÇö';
+  if (!val) return '–';
   const d = val?.toDate ? val.toDate() : new Date(val);
-  return isNaN(d) ? 'ΓÇö' : d.toLocaleString();
+  return isNaN(d) ? '–' : d.toLocaleString();
 }
 
-// ΓöÇΓöÇ Alert list card ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// -- Alert list card -----------------------------------------------------------
 
 function AlertCard({ alert, selected, onClick }) {
   const risk = RISK_COLORS[alert.riskLevel] ?? RISK_COLORS.Medium;
@@ -80,11 +80,11 @@ function AlertCard({ alert, selected, onClick }) {
       </div>
 
       {alert.animalName && (
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 3 }}>≡ƒÉ╛ {alert.animalName}</div>
+        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 3 }}>🐾 {alert.animalName}</div>
       )}
       <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 3 }}>
         <MapPin size={11} style={{ marginRight: 3, verticalAlign: 'middle' }} />
-        {alert.riskZone ?? alert.location ?? 'ΓÇö'}
+        {alert.riskZone ?? alert.location ?? '–'}
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{
@@ -99,7 +99,7 @@ function AlertCard({ alert, selected, onClick }) {
   );
 }
 
-// ΓöÇΓöÇ Response item ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// -- Response item -------------------------------------------------------------
 
 function ResponseItem({ r }) {
   const oc = { Resolved: '#16a34a', Monitoring: '#d97706', Reassigned: '#2563eb' };
@@ -124,7 +124,7 @@ function ResponseItem({ r }) {
   );
 }
 
-// ΓöÇΓöÇ Main page ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// -- Main page -----------------------------------------------------------------
 
 export default function WildlifeAlerts() {
   const [alerts,    setAlerts]    = useState([]);
@@ -204,7 +204,7 @@ export default function WildlifeAlerts() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ margin: 0, fontSize: 22, color: '#1B5E20' }}>Wildlife Collar Alerts</h1>
-        {error && <span style={{ fontSize: 12, color: '#d97706', background: '#fffbeb', padding: '4px 10px', borderRadius: 6, border: '1px solid #fde68a' }}>ΓÜá Offline ΓÇô showing cached data</span>}
+        {error && <span style={{ fontSize: 12, color: '#d97706', background: '#fffbeb', padding: '4px 10px', borderRadius: 6, border: '1px solid #fde68a' }}>⚠ Offline – showing cached data</span>}
       </div>
 
       {/* KPI cards */}
@@ -230,12 +230,12 @@ export default function WildlifeAlerts() {
       {/* Main layout */}
       <div style={{ display: 'flex', gap: 16, flex: 1, minHeight: 0 }}>
 
-        {/* Left ΓÇö Alert list */}
+        {/* Left – Alert list */}
         <div style={{ width: 320, display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
 
           {/* Search */}
           <input
-            placeholder="Search alertsΓÇª"
+            placeholder="Search alerts…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13, outline: 'none' }}
@@ -257,7 +257,7 @@ export default function WildlifeAlerts() {
             {loading ? (
               <div style={{ textAlign: 'center', color: '#6b7280', paddingTop: 40 }}>
                 <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite' }} />
-                <p>Loading alertsΓÇª</p>
+                <p>Loading alerts…</p>
               </div>
             ) : filtered.length === 0 ? (
               <div style={{ textAlign: 'center', color: '#9ca3af', paddingTop: 40 }}>No alerts found</div>
@@ -267,7 +267,7 @@ export default function WildlifeAlerts() {
           </div>
         </div>
 
-        {/* Right ΓÇö Detail panel */}
+        {/* Right – Detail panel */}
         <div style={{ flex: 1, background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', overflowY: 'auto', padding: 20 }}>
           {!selected ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af', gap: 12 }}>
@@ -305,9 +305,9 @@ export default function WildlifeAlerts() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
                 {[
                   { label: 'Generated At', value: formatTime(selected.generatedAt), icon: Clock },
-                  { label: 'Risk Zone',    value: selected.riskZone ?? selected.location ?? 'ΓÇö', icon: MapPin },
-                  { label: 'Park',         value: selected.parkName ?? selected.parkId ?? 'ΓÇö', icon: MapPin },
-                  { label: 'Collar ID',    value: selected.collarId ?? 'ΓÇö', icon: Radio },
+                  { label: 'Risk Zone',    value: selected.riskZone ?? selected.location ?? '–', icon: MapPin },
+                  { label: 'Park',         value: selected.parkName ?? selected.parkId ?? '–', icon: MapPin },
+                  { label: 'Collar ID',    value: selected.collarId ?? '–', icon: Radio },
                 ].map(({ label, value, icon: Icon }) => (
                   <div key={label} style={{ background: '#f9fafb', borderRadius: 8, padding: '10px 12px' }}>
                     <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
@@ -330,9 +330,9 @@ export default function WildlifeAlerts() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                       {[
                         ['Name',    selected.animalName],
-                        ['Species', selected.species ?? animal?.species ?? 'ΓÇö'],
-                        ['ID',      selected.animalId ?? 'ΓÇö'],
-                        ['Collar',  selected.collarId ?? 'ΓÇö'],
+                        ['Species', selected.species ?? animal?.species ?? '–'],
+                        ['ID',      selected.animalId ?? '–'],
+                        ['Collar',  selected.collarId ?? '–'],
                       ].map(([k, v]) => (
                         <div key={k}>
                           <span style={{ fontSize: 11, color: '#6b7280' }}>{k}: </span>
@@ -373,7 +373,7 @@ export default function WildlifeAlerts() {
               {selected.acknowledgedBy && (
                 <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 8, padding: '10px 14px', marginBottom: 20 }}>
                   <span style={{ fontSize: 12, color: '#7c3aed', fontWeight: 600 }}>
-                    Γ£ô Acknowledged by {selected.acknowledgedBy} at {formatTime(selected.acknowledgedAt)}
+                    ✓ Acknowledged by {selected.acknowledgedBy} at {formatTime(selected.acknowledgedAt)}
                   </span>
                 </div>
               )}
@@ -396,3 +396,4 @@ export default function WildlifeAlerts() {
     </div>
   );
 }
+

@@ -5,7 +5,9 @@
  * Writes to:   collar_alerts   (status updates)
  *              collar_responses (ranger responses)
  *
- * Falls back to mockAlerts if Firestore is unreachable (offline).
+ * Alerts are created from the admin dashboard Wildlife page.
+ * No mock fallback – empty array is returned when Firestore is unreachable
+ * so the UI shows its offline/empty state rather than stale seed data.
  */
 
 import {
@@ -13,7 +15,6 @@ import {
   doc, updateDoc, addDoc, serverTimestamp, deleteDoc,
 } from 'firebase/firestore';
 import { db } from '../../../core/config/firebase';
-import { MOCK_ALERTS } from '../data/mockAlerts';
 import { uriToBase64 } from './photoUploadService';
 
 // ── Subscribe to live alerts list ─────────────────────────────────────────────
@@ -37,11 +38,11 @@ export function subscribeToAlerts(callback) {
     q,
     (snapshot) => {
       const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-      callback({ data: data.length > 0 ? data : MOCK_ALERTS, error: null, loading: false });
+      callback({ data, error: null, loading: false });
     },
     (err) => {
-      console.warn('[alertService] Firestore error, using mock data:', err.message);
-      callback({ data: MOCK_ALERTS, error: err.message, loading: false });
+      console.warn('[alertService] Firestore error:', err.message);
+      callback({ data: [], error: err.message, loading: false });
     },
   );
 
@@ -69,12 +70,11 @@ export function subscribeToAlert(alertId, fallback, callback) {
       if (snap.exists()) {
         callback({ id: snap.id, ...snap.data() });
       } else {
-        // Doc not in Firestore yet — use mock fallback
         callback(fallback);
       }
     },
     (err) => {
-      console.warn('[alertService] subscribeToAlert error, using fallback:', err.message);
+      console.warn('[alertService] subscribeToAlert error:', err.message);
       callback(fallback);
     },
   );
